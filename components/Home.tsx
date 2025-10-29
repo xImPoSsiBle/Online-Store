@@ -1,4 +1,3 @@
-import React from 'react'
 import { FlatList, StyleSheet, Text, View } from 'react-native'
 
 const products = [
@@ -6,21 +5,25 @@ const products = [
     id: "1",
     name: "iPhone 15",
     price: "1200$",
+    category: "phone",
   },
   {
     id: "2",
     name: "Samsung Galaxy S24",
     price: "1000$",
+    category: "phone",
   },
   {
     id: "3",
     name: "MacBook Pro 14",
     price: "2000$",
+    category: "computer",
   },
   {
     id: "4",
     name: "Sony WH-1000XM5",
     price: "350$",
+    category: "phone",
   }
 ]
 
