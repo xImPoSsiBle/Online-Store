@@ -16,17 +16,18 @@ const categories: Category[] = [
 ];
 
 const Catalog: React.FC = () => {
-
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Категории товаров</Text>
       <FlatList
         data={categories}
-        renderItem={({item}) => (
-            <TouchableOpacity style={styles.card}>
-                <Image source={{ uri: item.image }} style={styles.image} />
-                <Text style={styles.text}>{item.name}</Text>
-            </TouchableOpacity>
+        renderItem={({ item }) => (
+          <TouchableOpacity style={styles.card}>
+            <View style={styles.imageContainer}>
+              <Image source={{ uri: item.image }} style={styles.image} resizeMode="contain" />
+            </View>
+            <Text style={styles.text}>{item.name}</Text>
+          </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
         numColumns={2}
@@ -53,27 +54,40 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   card: {
-    backgroundColor: "#f5f5f5",
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 20,
     alignItems: "center",
     justifyContent: "center",
     flex: 1,
     marginBottom: 16,
-    marginHorizontal: 4,
+    marginHorizontal: 6,
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 6,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#f2f2f2",
+  },
+  imageContainer: {
+    width: 100,
+    height: 100,
+    borderRadius: 12,
+    backgroundColor: "#f9f9f9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10,
   },
   image: {
     width: 70,
     height: 70,
-    marginBottom: 8,
   },
   text: {
     fontSize: 16,
-    fontWeight: "500",
+    fontWeight: "600",
+    textAlign: "center",
+    color: "#333",
   },
 });
 
