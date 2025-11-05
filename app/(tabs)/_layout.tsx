@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { Tabs } from 'expo-router';
 
 export default function TabsLayout() {
   return (
@@ -8,15 +8,15 @@ export default function TabsLayout() {
         tabBarIcon: ({ color, size }) => {
           let iconName;
 
-          // 🔹 Подбираем иконки для каждой вкладки
           if (route.name === 'home') iconName = 'home-outline';
           else if (route.name === 'catalog') iconName = 'apps-outline';
           else if (route.name === 'cart') iconName = 'cart-outline';
+          else if (route.name == "profile") iconName = 'person-outline'
 
           return <Ionicons name={iconName as any} size={size} color={color} />;
         },
 
-        tabBarActiveTintColor: 'tomato',
+        tabBarActiveTintColor: '#007AFF',
         tabBarInactiveTintColor: 'gray',
 
         tabBarStyle: {
@@ -49,6 +49,14 @@ export default function TabsLayout() {
         name="cart"
         options={{
           title: 'Корзина',
+          headerShown: false,
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Профиль',
           headerShown: false,
         }}
       />
