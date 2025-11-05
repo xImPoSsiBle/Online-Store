@@ -1,16 +1,41 @@
-import React from 'react';
-import { FlatList, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import React from "react";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 const cartItems = [
-  { id: '1', name: 'iPhone 15', price: 1200, quantity: 1 },
-  { id: '2', name: 'Sony WH-1000XM5', price: 350, quantity: 2 },
-  { id: '3', name: 'MacBook Pro 14"', price: 2000, quantity: 1 },
+  {
+    id: "1",
+    name: "Apple MacBook Pro Core i9 9th Gen",
+    price: 1000000,
+    quantity: 1,
+    image:
+      "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg",
+  },
+  {
+    id: "2",
+    name: "Apple MacBook Pro Core i9 9th Gen",
+    price: 1000000,
+    quantity: 1,
+    image:
+      "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg",
+  },
 ];
 
 const Cart = () => {
+  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🛒 Корзина</Text>
+      <Text style={styles.header}>Корзина</Text>
+
+      <View style={styles.addressBox}>
+        <View>
+          <Text style={styles.addressTitle}>Доставить в E-509,9</Text>
+          <Text style={styles.addressSubtitle}>Jetisu,Агаш,3 очередь,квартал,Улица E 509,9</Text>
+        </View>
+        <TouchableOpacity style={styles.editBtn}>
+          <Text style={styles.editText}>Изменить</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={cartItems}
@@ -18,25 +43,51 @@ const Cart = () => {
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View>
+            <Image source={{ uri: item.image }} style={styles.image} />
+            <View style={{ flex: 1 }}>
               <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.price}>
-                {item.price}$ × {item.quantity}
-              </Text>
+              <Text style={styles.price}>{item.price.toLocaleString()} тг</Text>
+              <Text style={styles.stock}>Осталось 3 шт</Text>
+              <View style={styles.controls}>
+                <TouchableOpacity style={styles.quantityBtn}>
+                  <Text style={styles.qtyText}>–</Text>
+                </TouchableOpacity>
+                <Text style={styles.qtyNum}>{item.quantity}</Text>
+                <TouchableOpacity style={styles.quantityBtn}>
+                  <Text style={styles.qtyText}>+</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.trashBtn}>
+                  <Text style={styles.trashText}>Удалить</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-            <TouchableOpacity style={styles.removeButton}>
-              <Text style={styles.removeText}>Удалить</Text>
-            </TouchableOpacity>
           </View>
         )}
       />
 
-      <View style={styles.footer}>
-        <Text style={styles.total}>Итого: 2900$</Text>
-        <TouchableOpacity style={styles.buyButton}>
-          <Text style={styles.buyText}>Оформить заказ</Text>
-        </TouchableOpacity>
+      <View style={styles.summaryBox}>
+        <Text style={styles.delivery}>
+          День доставки: 10 Нояб, Пн <Text style={styles.free}>| бесплатно</Text>
+        </Text>
+
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Цена продажи</Text>
+          <Text style={styles.summaryValue}>{total.toLocaleString()} тг</Text>
+        </View>
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryLabel}>Итоговая скидка</Text>
+          <Text style={styles.discountValue}>–1 000 000 тг</Text>
+        </View>
+
+        <View style={styles.summaryRow}>
+          <Text style={styles.summaryTotalLabel}>Сумма к оплате</Text>
+          <Text style={styles.summaryTotalValue}>{total.toLocaleString()} тг</Text>
+        </View>
       </View>
+
+      <TouchableOpacity style={styles.buyButton}>
+        <Text style={styles.buyText}>Купить за {total.toLocaleString()} тг</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -44,72 +95,87 @@ const Cart = () => {
 export default Cart;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fafafa',
-    padding: 15,
-  },
-  title: {
-    textAlign: 'center',
-    fontSize: 26,
-    fontWeight: '700',
-    marginVertical: 10,
-  },
-  list: {
-    paddingBottom: 20,
-  },
-  card: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: '#fff',
+  container: { flex: 1, backgroundColor: "#f9f9f9", padding: 15 },
+  header: { fontSize: 22, fontWeight: "700", marginBottom: 15 },
+  addressBox: {
+    backgroundColor: "#fff",
     borderRadius: 12,
     padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
   },
-  name: {
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  price: {
-    fontSize: 16,
-    color: '#007AFF',
-    marginTop: 4,
-  },
-  removeButton: {
-    backgroundColor: '#ff4444',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+  addressTitle: { fontWeight: "700", fontSize: 16 },
+  addressSubtitle: { color: "#555", marginTop: 4, fontSize: 13 },
+  editBtn: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
   },
-  removeText: {
-    color: '#fff',
-    fontWeight: '600',
+  editText: { fontSize: 13, fontWeight: "600" },
+
+  list: { paddingBottom: 10 },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    flexDirection: "row",
+    padding: 10,
+    marginBottom: 12,
   },
-  footer: {
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    paddingTop: 15,
+  // 🔹 Добавлено изображение
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 8,
+    marginRight: 10,
+    resizeMode: "contain",
   },
-  total: {
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'right',
-    marginBottom: 10,
+  name: { fontSize: 14, fontWeight: "600", marginBottom: 4 },
+  price: { color: "#d32f2f", fontWeight: "700", marginBottom: 2 },
+  stock: { color: "#888", fontSize: 12, marginBottom: 8 },
+  controls: { flexDirection: "row", alignItems: "center" },
+  quantityBtn: {
+    backgroundColor: "#eee",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
   },
+  qtyText: { fontSize: 16, fontWeight: "700" },
+  qtyNum: { marginHorizontal: 8, fontSize: 15 },
+  trashBtn: { marginLeft: 12 },
+  trashText: { fontSize: 16 },
+
+  summaryBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
+    marginTop: 10,
+  },
+  delivery: { color: "#333", fontSize: 13, marginBottom: 8 },
+  free: { color: "#00A86B", fontWeight: "600" },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginVertical: 4,
+  },
+  summaryLabel: { color: "#555" },
+  summaryValue: { fontWeight: "600" },
+  discountValue: { color: "#d32f2f", fontWeight: "600" },
+  summaryTotalLabel: { fontSize: 16, fontWeight: "700", marginTop: 8 },
+  summaryTotalValue: { fontSize: 16, fontWeight: "700" },
   buyButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
+    backgroundColor: "#000",
+    paddingVertical: 15,
     borderRadius: 10,
+    marginTop: 15,
   },
   buyText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+    color: "#fff",
+    textAlign: "center",
+    fontSize: 17,
+    fontWeight: "700",
   },
 });
