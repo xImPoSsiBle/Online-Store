@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
 
@@ -6,8 +7,11 @@ const EditProfile = () => {
   const [phone, setPhone] = useState('+7 701 123 45 67');
   const [email, setEmail] = useState('rza@example.com');
 
+  const router = useRouter()
+
   const saveProfile = () => {
     alert('Профиль обновлен!');
+    router.back()
   };
 
   return (
