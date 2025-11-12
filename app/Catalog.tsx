@@ -9,11 +9,36 @@ type Category = {
 };
 
 const categories: Category[] = [
-  { id: "1", name: "Телефоны", image: "https://cdn-icons-png.flaticon.com/512/1055/1055646.png" },
-  { id: "2", name: "ПК", image: "https://cdn-icons-png.flaticon.com/512/869/869869.png" },
-  { id: "3", name: "Клавиатуры", image: "https://cdn-icons-png.flaticon.com/512/3075/3075977.png" },
-  { id: "4", name: "Наушники", image: "https://cdn-icons-png.flaticon.com/512/893/893292.png" },
-  { id: "5", name: "Мониторы", image: "https://cdn-icons-png.flaticon.com/512/2721/2721279.png" },
+  { 
+    id: "1", 
+    name: "Телефоны", 
+    image: require('../assets/images/catalog/Phones.png') // иконка смартфона
+  },
+  { 
+    id: "2", 
+    name: "Смарт Часы", 
+    image: require('../assets/images/catalog/Smart Watches.png') // иконка настольного компьютера
+  },
+  { 
+    id: "3", 
+    name: "Камеры", 
+    image: require('../assets/images/catalog/Cameras.png') // иконка клавиатуры
+  },
+  { 
+    id: "4", 
+    name: "Наушники", 
+    image: require('../assets/images/catalog/Headphones.png') // иконка наушников
+  },
+  { 
+    id: "5", 
+    name: "Компьютеры", 
+    image: require('../assets/images/catalog/Computers.png') // иконка монитора
+  },
+  { 
+    id: "6", 
+    name: "Игры", 
+    image: require('../assets/images/catalog/Gaming.png') // иконка монитора
+  },
 ];
 
 const Catalog: React.FC = () => {
@@ -27,7 +52,11 @@ const Catalog: React.FC = () => {
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.card} onPress={() => router.push("/(tabs)/home")}>
             <View style={styles.imageContainer}>
-              <Image source={{ uri: item.image }} style={styles.image} resizeMode="contain" />
+              <Image source={
+    typeof item.image === "string"
+      ? { uri: item.image } 
+      : item.image 
+  } style={styles.image} resizeMode="contain" />
             </View>
             <Text style={styles.text}>{item.name}</Text>
           </TouchableOpacity>
