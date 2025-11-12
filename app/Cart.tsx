@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -21,21 +22,13 @@ const cartItems = [
 ];
 
 const Cart = () => {
+  const router = useRouter();
+
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Корзина</Text>
-
-      <View style={styles.addressBox}>
-        <View>
-          <Text style={styles.addressTitle}>Доставить в E-509,9</Text>
-          <Text style={styles.addressSubtitle}>Jetisu,Агаш,3 очередь,квартал,Улица E 509,9</Text>
-        </View>
-        <TouchableOpacity style={styles.editBtn}>
-          <Text style={styles.editText}>Изменить</Text>
-        </TouchableOpacity>
-      </View>
 
       <FlatList
         data={cartItems}
@@ -85,7 +78,7 @@ const Cart = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.buyButton}>
+      <TouchableOpacity style={styles.buyButton} onPress={() => router.push("/Checkout")}>
         <Text style={styles.buyText}>Купить за {total.toLocaleString()} тг</Text>
       </TouchableOpacity>
     </View>
@@ -97,17 +90,6 @@ export default Cart;
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#f9f9f9", padding: 15 },
   header: { fontSize: 22, fontWeight: "700", marginBottom: 15 },
-  addressBox: {
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 15,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 15,
-  },
-  addressTitle: { fontWeight: "700", fontSize: 16 },
-  addressSubtitle: { color: "#555", marginTop: 4, fontSize: 13 },
   editBtn: {
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -125,7 +107,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 12,
   },
-  // 🔹 Добавлено изображение
   image: {
     width: 90,
     height: 90,

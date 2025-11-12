@@ -1,3 +1,4 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
@@ -16,13 +17,15 @@ const categories: Category[] = [
 ];
 
 const Catalog: React.FC = () => {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Категории товаров</Text>
       <FlatList
         data={categories}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card}>
+          <TouchableOpacity style={styles.card} onPress={() => router.push("/(tabs)/home")}>
             <View style={styles.imageContainer}>
               <Image source={{ uri: item.image }} style={styles.image} resizeMode="contain" />
             </View>

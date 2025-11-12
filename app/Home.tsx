@@ -54,10 +54,6 @@ const Home = () => {
         columnWrapperStyle={{ justifyContent: "space-between" }}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <View style={styles.ratingBadge}>
-              <Text style={styles.ratingText}>⭐ {item.rating}</Text>
-            </View>
-
             <Image source={{ uri: item.image }} style={styles.image} />
             <Text style={styles.name} numberOfLines={2}>
               {item.name}
