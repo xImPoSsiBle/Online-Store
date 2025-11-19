@@ -54,7 +54,7 @@ const Checkout = () => {
     dispatch(clearCart());
 
     alert("Заказ успешно оформлен!");
-    router.push("/Orders");
+    router.push("/home");
   };
 
   return (

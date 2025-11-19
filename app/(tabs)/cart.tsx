@@ -12,7 +12,6 @@ const Cart = () => {
   const cartItems = useSelector((s: RootState) => s.cart.items);
   const dispatch = useDispatch();
 
-
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (

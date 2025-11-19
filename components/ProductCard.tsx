@@ -30,7 +30,7 @@ export default function ProductCard({ item }: { item: Product }) {
                 {item.discount && <Text style={styles.discount}>{item.discount}</Text>}
             </View>
 
-            {item.oldPrice && <Text style={styles.oldPrice}>{item.oldPrice}</Text>}
+            <Text style={styles.oldPrice}>{item.oldPrice}</Text>
 
             <TouchableOpacity
                 style={styles.addBtn}
