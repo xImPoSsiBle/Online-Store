@@ -1,34 +1,25 @@
+import { changeQuantity, removeFromCart } from "@/store/CartSlice";
+import { RootState } from "@/store/store";
 import { useRouter } from "expo-router";
 import React from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
-const cartItems = [
-  {
-    id: "1",
-    name: "Apple MacBook Pro Core i9 9th Gen",
-    price: 1000000,
-    quantity: 1,
-    image:
-      "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg",
-  },
-  {
-    id: "2",
-    name: "Apple MacBook Pro Core i9 9th Gen",
-    price: 1000000,
-    quantity: 1,
-    image:
-      "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg",
-  },
-];
 
 const Cart = () => {
   const router = useRouter();
+
+  const cartItems = useSelector((s: RootState) => s.cart.items);
+  const dispatch = useDispatch();
+
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Корзина</Text>
+
+      {cartItems.length == 0 && <Text>Корзина пустая</Text>}
 
       <FlatList
         data={cartItems}
@@ -42,14 +33,14 @@ const Cart = () => {
               <Text style={styles.price}>{item.price.toLocaleString()} тг</Text>
               <Text style={styles.stock}>Осталось 3 шт</Text>
               <View style={styles.controls}>
-                <TouchableOpacity style={styles.quantityBtn}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: -1 }))}>
                   <Text style={styles.qtyText}>–</Text>
                 </TouchableOpacity>
                 <Text style={styles.qtyNum}>{item.quantity}</Text>
-                <TouchableOpacity style={styles.quantityBtn}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: 1 }))}>
                   <Text style={styles.qtyText}>+</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.trashBtn}>
+                <TouchableOpacity style={styles.trashBtn} onPress={() => dispatch(removeFromCart(item.id))}>
                   <Text style={styles.trashText}>Удалить</Text>
                 </TouchableOpacity>
               </View>
@@ -58,29 +49,33 @@ const Cart = () => {
         )}
       />
 
-      <View style={styles.summaryBox}>
+      {cartItems.length !== 0 && <View style={styles.summaryBox}>
         <Text style={styles.delivery}>
           День доставки: 10 Нояб, Пн <Text style={styles.free}>| бесплатно</Text>
         </Text>
 
         <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Цена продажи</Text>
+          <Text style={styles.summaryLabel}>Товары ({cartItems.length})</Text>
           <Text style={styles.summaryValue}>{total.toLocaleString()} тг</Text>
-        </View>
-        <View style={styles.summaryRow}>
-          <Text style={styles.summaryLabel}>Итоговая скидка</Text>
-          <Text style={styles.discountValue}>–1 000 000 тг</Text>
         </View>
 
         <View style={styles.summaryRow}>
           <Text style={styles.summaryTotalLabel}>Сумма к оплате</Text>
-          <Text style={styles.summaryTotalValue}>{total.toLocaleString()} тг</Text>
+          <Text style={styles.summaryTotalValue}>
+            {total.toLocaleString()} тг
+          </Text>
         </View>
-      </View>
+      </View>}
 
-      <TouchableOpacity style={styles.buyButton} onPress={() => router.push("/Checkout")}>
-        <Text style={styles.buyText}>Купить за {total.toLocaleString()} тг</Text>
-      </TouchableOpacity>
+      {cartItems.length !== 0 && <TouchableOpacity
+        style={styles.buyButton}
+        onPress={() => router.push("/Checkout")}
+      >
+        <Text style={styles.buyText}>
+          Купить за {total.toLocaleString()} тг
+        </Text>
+      </TouchableOpacity>}
+
     </View>
   );
 };

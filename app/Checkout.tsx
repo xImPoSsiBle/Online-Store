@@ -1,3 +1,6 @@
+import { clearCart } from "@/store/CartSlice";
+import { addOrder } from "@/store/OrdersSlice";
+import { RootState } from "@/store/store";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -10,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
 
 const cartItems = [
   { id: "1", name: "Apple MacBook Pro", price: 1000000, quantity: 1, image: "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg" },
@@ -17,22 +21,41 @@ const cartItems = [
 ];
 
 const Checkout = () => {
-  const router = useRouter();
+ const router = useRouter();
+  const dispatch = useDispatch();
+
+  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
+
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("card");
 
   const confirmOrder = () => {
-    if(!name.trim() || !phone.trim() || !address.trim()) {
+    if (!name.trim() || !phone.trim() || !address.trim()) {
       alert("Заполните все поля!");
       return;
     }
-    alert("Заказ успешно оформлен!");
-    router.back();
-  }
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    dispatch(
+      addOrder({
+        id: Date.now().toString(),
+        items: cartItems,
+        total,
+        name,
+        phone,
+        address,
+        paymentMethod,
+        date: new Date().toLocaleDateString("ru-RU"),
+      })
+    );
+
+    dispatch(clearCart());
+
+    alert("Заказ успешно оформлен!");
+    router.push("/Orders");
+  };
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 15 }}>
@@ -43,6 +66,7 @@ const Checkout = () => {
       <Text style={styles.header}>Оформление заказа</Text>
 
       <Text style={styles.sectionTitle}>Ваши товары</Text>
+
       <FlatList
         data={cartItems}
         keyExtractor={(item) => item.id}
@@ -60,17 +84,30 @@ const Checkout = () => {
       />
 
       <Text style={styles.sectionTitle}>Контактные данные</Text>
-      <TextInput style={styles.input} placeholder="Имя" value={name} onChangeText={setName} />
-      <TextInput style={styles.input} placeholder="Телефон" value={phone} onChangeText={setPhone} keyboardType="phone-pad" />
-      <TextInput style={styles.input} placeholder="Адрес доставки" value={address} onChangeText={setAddress} />
+
+      <TextInput placeholder="Имя" value={name} onChangeText={setName} style={styles.input} />
+      <TextInput placeholder="Телефон" value={phone} onChangeText={setPhone} keyboardType="phone-pad" style={styles.input} />
+      <TextInput placeholder="Адрес доставки" value={address} onChangeText={setAddress} style={styles.input} />
 
       <Text style={styles.sectionTitle}>Способ оплаты</Text>
+
       <View style={styles.paymentMethods}>
-        <TouchableOpacity style={[styles.paymentBtn, paymentMethod === "card" && styles.paymentSelected]} onPress={() => setPaymentMethod("card")}>
-          <Text style={[styles.paymentText, paymentMethod === "card" && styles.paymentSelectedText]}>Картой</Text>
+        <TouchableOpacity
+          style={[styles.paymentBtn, paymentMethod === "card" && styles.paymentSelected]}
+          onPress={() => setPaymentMethod("card")}
+        >
+          <Text style={[styles.paymentText, paymentMethod === "card" && styles.paymentSelectedText]}>
+            Картой
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.paymentBtn, paymentMethod === "cash" && styles.paymentSelected]} onPress={() => setPaymentMethod("cash")}>
-          <Text style={[styles.paymentText, paymentMethod === "cash" && styles.paymentSelectedText]}>Наличными</Text>
+
+        <TouchableOpacity
+          style={[styles.paymentBtn, paymentMethod === "cash" && styles.paymentSelected]}
+          onPress={() => setPaymentMethod("cash")}
+        >
+          <Text style={[styles.paymentText, paymentMethod === "cash" && styles.paymentSelectedText]}>
+            Наличными
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -81,7 +118,7 @@ const Checkout = () => {
         </View>
       </View>
 
-      <TouchableOpacity style={styles.buyButton} onPress={() => confirmOrder()}>
+      <TouchableOpacity style={styles.buyButton} onPress={confirmOrder}>
         <Text style={styles.buyText}>Подтвердить заказ</Text>
       </TouchableOpacity>
     </ScrollView>

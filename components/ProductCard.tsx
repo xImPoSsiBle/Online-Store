@@ -1,9 +1,12 @@
+import { addToCart } from "@/store/CartSlice";
 import { Product } from "@/store/ProductsSlice";
 import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch } from "react-redux";
 
 export default function ProductCard({ item }: { item: Product }) {
     const router = useRouter();
+    const dispatch = useDispatch();
 
     return (
         <TouchableOpacity
@@ -28,6 +31,24 @@ export default function ProductCard({ item }: { item: Product }) {
             </View>
 
             {item.oldPrice && <Text style={styles.oldPrice}>{item.oldPrice}</Text>}
+
+            <TouchableOpacity
+                style={styles.addBtn}
+                onPress={() =>
+                    dispatch(
+                        addToCart({
+                            id: item.id,
+                            name: item.name,
+                            price: Number(item.price.replace(/\D/g, "")),
+                            quantity: 1,
+                            image: item.image,
+                        })
+                    )
+                }
+            >
+                <Text style={styles.addText}>Добавить</Text>
+            </TouchableOpacity>
+
         </TouchableOpacity>
     );
 }
@@ -39,7 +60,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         padding: 10,
         marginBottom: 15,
-        marginHorizontal: 2, 
+        marginHorizontal: 2,
         elevation: 3,
         shadowColor: "#000",
         shadowOpacity: 0.1,
@@ -80,5 +101,16 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: "#777",
         textDecorationLine: "line-through",
+    },
+    addBtn: {
+        backgroundColor: "#000",
+        paddingVertical: 8,
+        borderRadius: 6,
+        marginTop: 10,
+    },
+    addText: {
+        color: "#fff",
+        textAlign: "center",
+        fontWeight: "600",
     },
 });
