@@ -3,5 +3,23 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "sqltools.connections": [
+    {
+      "pgOptions": {
+        "ssl": {
+          "rejectUnauthorized": true,
+          "ca": "C:\\Users\\Impossible\\.postgresql\\root.crt"
+        }
+      },
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "rc1b-2s72352iairlibiu.mdb.yandexcloud.net",
+      "port": 6432,
+      "driver": "PostgreSQL",
+      "name": "pg-shamatai",
+      "database": "db1",
+      "username": "user1"
+    }
+  ]
 }
