@@ -1,70 +1,55 @@
-import { useRouter } from "expo-router";
 import React from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, TouchableOpacity, Text, View, StyleSheet } from "react-native";
+import { useDispatch } from "react-redux";
+import { useRouter } from "expo-router";
+import { setCategory } from "@/store/ProductsSlice";
 
-type Category = {
-  id: string;
-  name: string;
-  image: string;
-};
-
-const categories: Category[] = [
-  { 
-    id: "1", 
-    name: "Телефоны", 
-    image: require('../../assets/images/catalog/Phones.png') 
-  },
-  { 
-    id: "2", 
-    name: "Смарт Часы", 
-    image: require('../../assets/images/catalog/Smart Watches.png') 
-  },
-  { 
-    id: "3", 
-    name: "Камеры", 
-    image: require('../../assets/images/catalog/Cameras.png')
-  },
-  { 
-    id: "4", 
-    name: "Наушники", 
-    image: require('../../assets/images/catalog/Headphones.png') 
-  },
-  { 
-    id: "5", 
-    name: "Компьютеры", 
-    image: require('../../assets/images/catalog/Computers.png') 
-  },
-  { 
-    id: "6", 
-    name: "Игры", 
-    image: require('../../assets/images/catalog/Gaming.png') 
-  },
+const categories = [
+  { id: "Телефоны", name: "Телефоны", image: require("../../assets/images/catalog/Phones.png") },
+  { id: "Смарт Часы", name: "Смарт Часы", image: require("../../assets/images/catalog/Smart Watches.png") },
+  { id: "Камеры", name: "Камеры", image: require("../../assets/images/catalog/Cameras.png") },
+  { id: "Наушники", name: "Наушники", image: require("../../assets/images/catalog/Headphones.png") },
+  { id: "Компьютеры", name: "Компьютеры", image: require("../../assets/images/catalog/Computers.png") },
 ];
 
-const Catalog: React.FC = () => {
+const Catalog = () => {
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  const handlePress = (category: string) => {
+    dispatch(setCategory(category));
+    router.push("/(tabs)/home");
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Категории товаров</Text>
+    <View style={{ padding: 16 }}>
       <FlatList
         data={categories}
+        numColumns={2}
         renderItem={({ item }) => (
-          <TouchableOpacity style={styles.card} onPress={() => router.push("/(tabs)/home")}>
-            <View style={styles.imageContainer}>
-              <Image source={
-    typeof item.image === "string"
-      ? { uri: item.image } 
-      : item.image 
-  } style={styles.image} resizeMode="contain" />
-            </View>
-            <Text style={styles.text}>{item.name}</Text>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 15,
+              padding: 20,
+              flex: 1,
+              alignItems: "center",
+              margin: 8,
+              elevation: 3,
+            }}
+            onPress={() => handlePress(item.name)}
+          >
+            <Image
+              source={item.image}
+              style={{ width: 80, height: 80 }}
+              resizeMode="contain"
+            />
+            <Text style={{ marginTop: 10, fontSize: 16, fontWeight: "600" }}>
+              {item.name}
+            </Text>
           </TouchableOpacity>
         )}
         keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        showsVerticalScrollIndicator={false}
       />
     </View>
   );
