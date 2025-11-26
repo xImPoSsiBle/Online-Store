@@ -1,14 +1,11 @@
+import { useAppSelector } from "@/hooks/redux";
 import React from "react";
 import { FlatList, StyleSheet, Text, View } from "react-native";
-import { useSelector } from "react-redux";
 import ProductCard from "../../components/ProductCard";
 import SearchBar from "../../components/SearchBar";
-import { RootState } from "../../store/store";
 
 const Home = () => {
-  const { products, search, selectedCategory } = useSelector(
-    (s: RootState) => s.products
-  );
+  const { products, search, selectedCategory } = useAppSelector(state => state.products);
 
   const filtered = products.filter((p) => {
     const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
@@ -40,7 +37,7 @@ export default Home;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 15,
+    paddingHorizontal: 15,
     backgroundColor: "#fff",
   },
   title: {

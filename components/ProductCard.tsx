@@ -4,53 +4,33 @@ import { useRouter } from "expo-router";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch } from "react-redux";
 
-export default function ProductCard({ item }: { item: Product }) {
-    const router = useRouter();
-    const dispatch = useDispatch();
+type ProductCardProps = {
+  item: Product;
+};
 
-    return (
-        <TouchableOpacity
-            style={styles.card}
-            onPress={() =>
-                router.push({
-                    pathname: "/product/[id]",
-                    params: { id: item.id },
-                })
-            }
-        >
-            <Image source={{ uri: item.image }} style={styles.image} />
+export default function ProductCard({ item }: ProductCardProps) {
+  const dispatch = useDispatch();
+  const router = useRouter();
 
-            <Text style={styles.name} numberOfLines={2}>
-                {item.name}
-            </Text>
-
-            <View style={styles.priceRow}>
-                <Text style={styles.price}>{item.price}</Text>
-
-                {item.discount && <Text style={styles.discount}>{item.discount}</Text>}
-            </View>
-
-            <Text style={styles.oldPrice}>{item.oldPrice}</Text>
-
-            <TouchableOpacity
-                style={styles.addBtn}
-                onPress={() =>
-                    dispatch(
-                        addToCart({
-                            id: item.id,
-                            name: item.name,
-                            price: Number(item.price.replace(/\D/g, "")),
-                            quantity: 1,
-                            image: item.image,
-                        })
-                    )
-                }
-            >
-                <Text style={styles.addText}>Добавить</Text>
-            </TouchableOpacity>
-
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => router.push(`/product/${item.id}`)}
+    >
+      <Image source={{ uri: item.image }} style={styles.image} />
+      <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
+      <View style={styles.priceRow}>
+        <Text style={styles.price}>{item.discountPrice ?? item.price} ₸</Text>
+        {item.discountPercent && <Text style={styles.discount}>{item.discountPercent}</Text>}
+      </View>
+      <TouchableOpacity
+        style={styles.addBtn}
+        onPress={() => dispatch(addToCart({ id: item.id, name: item.name, price: item.discountPrice ?? item.price, quantity: 1, image: item.image }))}
+      >
+        <Text style={styles.addText}>Добавить</Text>
+      </TouchableOpacity>
+    </TouchableOpacity>
+  );
 }
 
 const styles = StyleSheet.create({

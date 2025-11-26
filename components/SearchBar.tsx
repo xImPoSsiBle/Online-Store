@@ -1,11 +1,11 @@
+import { useAppSelector } from "@/hooks/redux";
 import { setSearch } from "@/store/ProductsSlice";
 import { Searchbar } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { useDispatch } from "react-redux";
 
 const SearchBar = () => {
   const dispatch = useDispatch();
-  const value = useSelector((s: RootState) => s.products.search);
+  const value = useAppSelector(state => state.products.search);
 
   return (
     <Searchbar

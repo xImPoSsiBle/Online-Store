@@ -1,6 +1,7 @@
+import { BackButton } from "@/components/BackButton";
+import { useAppSelector } from "@/hooks/redux";
 import { clearCart } from "@/store/CartSlice";
 import { addOrder } from "@/store/OrdersSlice";
-import { RootState } from "@/store/store";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,18 +14,14 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
-const cartItems = [
-  { id: "1", name: "Apple MacBook Pro", price: 1000000, quantity: 1, image: "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg" },
-  { id: "2", name: "Apple MacBook Pro", price: 1000000, quantity: 1, image: "https://images.satu.kz/126448844_w640_h320_noutbuk-apple-macbook.jpg" },
-];
 
 const Checkout = () => {
- const router = useRouter();
+  const router = useRouter();
   const dispatch = useDispatch();
 
-  const cartItems = useSelector((state: RootState) => state.cart.items);
+  const cartItems = useAppSelector(state => state.cart.items);
   const total = cartItems.reduce((s, i) => s + i.price * i.quantity, 0);
 
   const [name, setName] = useState("");
@@ -59,11 +56,11 @@ const Checkout = () => {
 
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1, padding: 15 }}>
-      <TouchableOpacity onPress={() => router.back()} style={{ marginBottom: 10 }}>
-        <Text style={{ color: "#007AFF" }}>← Назад</Text>
-      </TouchableOpacity>
 
-      <Text style={styles.header}>Оформление заказа</Text>
+      <View style={styles.headerRow}>
+        <BackButton style={{margin: 0, padding: 0}}/>
+        <Text style={styles.headerText}>Оформление заказа</Text>
+      </View>
 
       <Text style={styles.sectionTitle}>Ваши товары</Text>
 
@@ -128,94 +125,103 @@ const Checkout = () => {
 export default Checkout;
 
 const styles = StyleSheet.create({
-  header: { 
-    fontSize: 22, 
-    fontWeight: "700", 
-    marginBottom: 15 
+  header: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginBottom: 15
   },
-  sectionTitle: { 
-    fontSize: 16, 
-    fontWeight: "600", 
-    marginTop: 15, 
-    marginBottom: 8 
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
   },
-  card: { 
-    flexDirection: "row", 
-    backgroundColor: "#fff", 
-    padding: 10, 
-    borderRadius: 12, 
-    marginBottom: 12 
+  headerText: {
+    fontSize: 20,
+    fontWeight: "600",
   },
-  image: { 
-    width: 90, 
-    height: 90, 
-    borderRadius: 8, 
-    marginRight: 10, 
-    resizeMode: "contain" 
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    marginTop: 15,
+    marginBottom: 8
   },
-  name: { 
-    fontWeight: "600", 
-    fontSize: 14 
+  card: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 12
   },
-  price: { 
-    color: "#d32f2f", 
-    fontWeight: "700" 
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 8,
+    marginRight: 10,
+    resizeMode: "contain"
   },
-  input: { 
-    backgroundColor: "#fff", 
-    borderRadius: 10, 
-    padding: 12, 
-    marginBottom: 10 
+  name: {
+    fontWeight: "600",
+    fontSize: 14
   },
-  paymentMethods: { 
-    flexDirection: "row", 
-    marginBottom: 15 
+  price: {
+    color: "#d32f2f",
+    fontWeight: "700"
   },
-  paymentBtn: { 
-    flex: 1, 
-    backgroundColor: "#eee", 
-    padding: 12, 
-    borderRadius: 10, 
-    marginRight: 10 
+  input: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 10
   },
-  paymentSelected: { 
-    backgroundColor: "#000" 
+  paymentMethods: {
+    flexDirection: "row",
+    marginBottom: 15
   },
-  paymentText: { 
-    textAlign: "center", 
-    color: "#000", 
-    fontWeight: "600" 
+  paymentBtn: {
+    flex: 1,
+    backgroundColor: "#eee",
+    padding: 12,
+    borderRadius: 10,
+    marginRight: 10
   },
-  paymentSelectedText: { 
-    color: "#fff" 
+  paymentSelected: {
+    backgroundColor: "#000"
   },
-  summaryBox: { 
-    backgroundColor: "#fff", 
-    borderRadius: 12, 
-    padding: 15, 
-    marginBottom: 15 
+  paymentText: {
+    textAlign: "center",
+    color: "#000",
+    fontWeight: "600"
   },
-  summaryRow: { 
-    flexDirection: "row", 
-    justifyContent: "space-between" 
+  paymentSelectedText: {
+    color: "#fff"
   },
-  summaryLabel: { 
-    color: "#555", 
-    fontWeight: "600" 
+  summaryBox: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15
   },
-  summaryTotalValue: { 
-    fontSize: 16, 
-    fontWeight: "700" 
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between"
   },
-  buyButton: { 
-    backgroundColor: "#000", 
-    padding: 15, 
-    borderRadius: 10 
+  summaryLabel: {
+    color: "#555",
+    fontWeight: "600"
   },
-  buyText: { 
-    color: "#fff", 
-    textAlign: "center", 
-    fontWeight: "700", 
-    fontSize: 16 
+  summaryTotalValue: {
+    fontSize: 16,
+    fontWeight: "700"
+  },
+  buyButton: {
+    backgroundColor: "#000",
+    padding: 15,
+    borderRadius: 10
+  },
+  buyText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "700",
+    fontSize: 16
   },
 });
