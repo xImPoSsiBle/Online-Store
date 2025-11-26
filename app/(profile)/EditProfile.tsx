@@ -1,6 +1,7 @@
+import { BackButton } from '@/components/BackButton';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const EditProfile = () => {
   const [name, setName] = useState('Rza Rzaev');
@@ -17,12 +18,11 @@ const EditProfile = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
 
-      {/* КНОПКА НАЗАД */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => router.back()}>
-        <Text style={styles.backText}>←</Text>
-      </TouchableOpacity>
 
-      <Text style={styles.header}>Редактирование профиля</Text>
+      <View style={styles.headerRow}>
+        <BackButton/>
+        <Text style={styles.headerText}>Редактирование профиля</Text>
+      </View>
 
       <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="ФИО" />
       <TextInput style={styles.input} value={phone} onChangeText={setPhone} placeholder="Телефон" keyboardType="phone-pad" />
@@ -38,50 +38,41 @@ const EditProfile = () => {
 export default EditProfile;
 
 const styles = StyleSheet.create({
-  container: { 
-    flexGrow: 1, 
-    backgroundColor: '#F8F8FF', 
-    padding: 20 
+  container: {
+    flexGrow: 1,
+    backgroundColor: '#F8F8FF',
+    padding: 20
   },
 
-  backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#EDEDED",
+  headerRow: {
+    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 10,
+    marginBottom: 20,
   },
-  backText: {
-    fontSize: 22,
+
+  headerText: {
+    fontSize: 20,
     fontWeight: "600",
   },
 
-  header: { 
-    fontSize: 22, 
-    fontWeight: '600', 
-    marginBottom: 20 
+  input: {
+    backgroundColor: '#fff',
+    padding: 12,
+    borderRadius: 10,
+    marginBottom: 15
   },
 
-  input: { 
-    backgroundColor: '#fff', 
-    padding: 12, 
-    borderRadius: 10, 
-    marginBottom: 15 
+  button: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 25,
+    marginTop: 10,
+    alignItems: 'center'
   },
 
-  button: { 
-    backgroundColor: '#007AFF', 
-    paddingVertical: 12, 
-    borderRadius: 25, 
-    marginTop: 10, 
-    alignItems: 'center' 
-  },
-
-  buttonText: { 
-    color: '#fff', 
-    fontSize: 16, 
-    fontWeight: '600' 
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600'
   },
 });
