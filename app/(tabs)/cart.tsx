@@ -1,18 +1,41 @@
+import { useAppSelector } from "@/hooks/redux";
 import { changeQuantity, removeFromCart } from "@/store/CartSlice";
-import { RootState } from "@/store/store";
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from "expo-router";
-import React from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
+import * as Animatable from 'react-native-animatable';
+import { useDispatch } from "react-redux";
 
 
 const Cart = () => {
   const router = useRouter();
 
-  const cartItems = useSelector((s: RootState) => s.cart.items);
+  const cartItems = useAppSelector(state => state.cart.items);
   const dispatch = useDispatch();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+  if (cartItems.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+
+        <Animatable.View animation="fadeInUp" delay={200} style={styles.emptyContent}>
+          <MaterialCommunityIcons name="cart-off" size={80} color="#aaa" />
+          <Text style={styles.emptyTitle}>Ваша корзина пуста</Text>
+          <Text style={styles.emptySubtitle}>
+            Вы ещё не добавили товары в корзину. Перейдите в каталог и выберите понравившиеся товары 🛒
+          </Text>
+
+          <TouchableOpacity 
+            style={styles.emptyButton}
+            onPress={() => router.push("/catalog")}
+          >
+            <Text style={styles.emptyButtonText}>Перейти в каталог</Text>
+          </TouchableOpacity>
+        </Animatable.View>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -152,5 +175,42 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 17,
     fontWeight: "700",
+  },
+    emptyContainer: {
+    flex: 1,
+    backgroundColor: '#F8F8FF',
+    padding: 20,
+  },
+  emptyContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -60,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: '#111',
+    marginTop: 20,
+    marginBottom: 10,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    color: '#555',
+    textAlign: 'center',
+    marginHorizontal: 20,
+    lineHeight: 22,
+    marginBottom: 25,
+  },
+  emptyButton: {
+    backgroundColor: "#000",
+    paddingVertical: 12,
+    paddingHorizontal: 25,
+    borderRadius: 25,
+  },
+  emptyButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
