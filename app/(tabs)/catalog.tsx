@@ -1,24 +1,43 @@
-import React from "react";
-import { FlatList, Image, TouchableOpacity, Text, View, StyleSheet } from "react-native";
-import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
-import { setCategory } from "@/store/ProductsSlice";
+import React from "react";
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useDispatch } from "react-redux";
 
 const categories = [
-  { id: "Телефоны", name: "Телефоны", image: require("../../assets/images/catalog/Phones.png") },
-  { id: "Смарт Часы", name: "Смарт Часы", image: require("../../assets/images/catalog/Smart Watches.png") },
-  { id: "Камеры", name: "Камеры", image: require("../../assets/images/catalog/Cameras.png") },
-  { id: "Наушники", name: "Наушники", image: require("../../assets/images/catalog/Headphones.png") },
-  { id: "Компьютеры", name: "Компьютеры", image: require("../../assets/images/catalog/Computers.png") },
+  {
+    id: "SmartPhone",
+    name: "Телефоны",
+    image: require("../../assets/images/catalog/Phones.png"),
+  },
+  {
+    id: "SmartWatch",
+    name: "Смарт Часы",
+    image: require("../../assets/images/catalog/Smart Watches.png")
+  },
+  {
+    id: "Camera",
+    name: "Камеры",
+    image: require("../../assets/images/catalog/Cameras.png"),
+  },
+  {
+    id: "Headphones",
+    name: "Наушники",
+    image: require("../../assets/images/catalog/Headphones.png"),
+  },
+  {
+    id: "Computers",
+    name: "Компьютеры",
+    image: require("../../assets/images/catalog/Computers.png"),
+  },
 ];
+
 
 const Catalog = () => {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const handlePress = (category: string) => {
-    dispatch(setCategory(category));
-    router.push("/(tabs)/home");
+    router.push(`../catalog/${category}`);
   };
 
   return (
@@ -37,7 +56,7 @@ const Catalog = () => {
               margin: 8,
               elevation: 3,
             }}
-            onPress={() => handlePress(item.name)}
+            onPress={() => handlePress(item.id)}
           >
             <Image
               source={item.image}
