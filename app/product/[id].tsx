@@ -1,151 +1,286 @@
 import { BackButton } from "@/components/BackButton";
+import FullScreenLoader from "@/components/Loader";
 import { useAppSelector } from "@/hooks/redux";
-import { addToCart } from "@/store/CartSlice";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { setIsLoading } from "@/store/ProductsSlice";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Snackbar } from "react-native-paper";
 import { useDispatch } from "react-redux";
 
 export default function ProductPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const dispatch = useDispatch();
-    const router = useRouter();
+    const { accessToken } = useAppSelector(state => state.auth)
 
-    const product = useAppSelector(state =>
-        state.products.products.find(p => p.id === id)
-    );
+    const [snackVisible, setSnackVisible] = useState(false);
+    const [product, setProduct] = useState({} as any);
 
-    if (!product) {
-        return (
-            <View style={styles.empty}>
-                <Text>Товар не найден</Text>
-            </View>
-        );
-    }
+    const getProduct = async () => {
+        dispatch(setIsLoading(true));
+        const resp = await fetch(`http://10.61.194.241:8000/api/products/${id}`);
 
-    const handleAddToCart = () => {
-        dispatch(dispatch(
-            addToCart({
-                id: product.id,
-                name: product.name,
-                price: Number(price),
-                quantity: 1,
-                image: product.image,
-            })
-        ));
-        alert("Товар добавлен в корзину!");
+        if (!resp.ok) {
+            dispatch(setIsLoading(false));
+            return;
+        }
+
+        const data = await resp.json();
+        console.log(data);
+
+        setProduct({
+            ...data,
+            price: Number(data.price),
+            discountPrice: Number(data.discount_price),
+            category: data.category?.name,
+            memory: data.details?.memory,
+            diagonal: data.details?.diagonal,
+            battery: data.details?.battery,
+            processor: data.details?.processor,
+            ram: data.details?.ram,
+            graphics_card: data.details?.graphics_card,
+            connection_type: data.details?.connection_type,
+            bluetooth_version: data.details?.bluetooth_version,
+            battery_life: data.details?.battery_life,
+            type: data.details?.type,
+            platform: data.details?.platform,
+            storage_capacity: data.details?.storage_capacity,
+            megapixels: data.details?.megapixels,
+            optical_zoom: data.details?.optical_zoom,
+            digital_zoom: data.details?.digital_zoom,
+        });
+
+        dispatch(setIsLoading(false));
     };
 
-    const renderSpecs = () => {
-        switch (product.category) {
-            case "SmartPhone":
-                return (
-                    <View style={styles.specs}>
-                        <Text>Память: {product.memory} ГБ</Text>
-                        <Text>Диагональ: {product.diagonal}"</Text>
-                        <Text>Батарея: {product.battery} мАч</Text>
-                    </View>
-                );
-            case "Headphones":
-                return (
-                    <View style={styles.specs}>
-                        <Text>Тип подключения: {product.connection_type}</Text>
-                        <Text>Bluetooth: {product.bluetooth_version}</Text>
-                        <Text>Время работы: {product.battery_life}</Text>
-                    </View>
-                );
-            case "Computers":
-                return (
-                    <View style={styles.specs}>
-                        <Text>Процессор: {product.processor}</Text>
-                        <Text>ОЗУ: {product.ram}</Text>
-                        <Text>Видеокарта: {product.graphics_card}</Text>
-                    </View>
-                );
-            case "Gaming":
-                return (
-                    <View style={styles.specs}>
-                        <Text>Тип: {product.type}</Text>
-                        <Text>Платформа: {product.platform}</Text>
-                        <Text>Объём памяти: {product.storage_capacity}</Text>
-                    </View>
-                );
-            case "Camera":
-                return (
-                    <View style={styles.specs}>
-                        <Text>Мегапиксели: {product.megapixels}</Text>
-                        <Text>Оптический зум: {product.optical_zoom}</Text>
-                        <Text>Цифровой зум: {product.digital_zoom}</Text>
-                    </View>
-                );
-            default:
-                return null;
+
+    const handleAddToCart = async () => {
+        dispatch(setIsLoading(true));
+
+        const resp = await fetch('http://10.61.194.241:8000/api/cart/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${accessToken}`
+            },
+            body: JSON.stringify({ product_id: id, quantity: 1 })
         }
+        );
+
+        if (!resp.ok) {
+            dispatch(setIsLoading(false));
+            return;
+        }
+
+        const data = await resp.json();
+        console.log(data);
+
+        dispatch(setIsLoading(false));
+
+        // dispatch(
+        //     addToCart({
+        //         id: product.id,
+        //         name: product.name,
+        //         price: product.discountPrice || product.price,
+        //         quantity: 1,
+        //         image: product.image,
+        //     })
+        // );
+        setSnackVisible(true)
     };
 
     const price = product.discountPrice || product.price;
+
+    const renderSpecs = () => {
+        const specItems: string[] = [];
+
+        if (!product) return null;
+
+        if (product.category === "SmartPhone") {
+            if (product.memory !== undefined) specItems.push(`Память: ${product.memory} ГБ`);
+            if (product.diagonal !== undefined) specItems.push(`Диагональ: ${product.diagonal}"`);
+            if (product.battery !== undefined) specItems.push(`Батарея: ${product.battery} мАч`);
+        }
+
+        if (product.category === "Headphones") {
+            if (product.connection_type) specItems.push(`Тип подключения: ${product.connection_type}`);
+            if (product.bluetooth_version) specItems.push(`Bluetooth: ${product.bluetooth_version}`);
+            if (product.battery_life) specItems.push(`Время работы: ${product.battery_life}`);
+        }
+
+        if (product.category === "Computers") {
+            if (product.processor) specItems.push(`Процессор: ${product.processor}`);
+            if (product.ram) specItems.push(`ОЗУ: ${product.ram}`);
+            if (product.graphics_card) specItems.push(`Видеокарта: ${product.graphics_card}`);
+        }
+
+        if (product.category === "Gaming") {
+            if (product.type) specItems.push(`Тип: ${product.type}`);
+            if (product.platform) specItems.push(`Платформа: ${product.platform}`);
+            if (product.storage_capacity) specItems.push(`Память: ${product.storage_capacity}`);
+        }
+
+        if (product.category === "Camera") {
+            if (product.megapixels) specItems.push(`Мегапиксели: ${product.megapixels}`);
+            if (product.optical_zoom) specItems.push(`Оптический зум: ${product.optical_zoom}`);
+            if (product.digital_zoom) specItems.push(`Цифровой зум: ${product.digital_zoom}`);
+        }
+
+        if (specItems.length === 0) return null;
+
+        return (
+            <View style={styles.specsCard}>
+                <Text style={styles.sectionTitle}>Характеристики</Text>
+                {specItems.map((item, index) => (
+                    <Text key={index} style={styles.specItem}>• {item}</Text>
+                ))}
+            </View>
+        );
+    };
+
+    useEffect(() => {
+        getProduct();
+    }, []);
+
+    if (!product || !product.id) {
+        return (
+            <FullScreenLoader />
+        );
+    }
 
     return (
         <View style={styles.container}>
             <BackButton style={styles.back} />
 
-            <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
+            <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
                 <Image source={{ uri: product.image }} style={styles.image} />
 
-                <Text style={styles.name}>{product.name}</Text>
-                <Text style={styles.description}>{product.description}</Text>
+                <View style={styles.card}>
+                    <Text style={styles.name}>{product.name}</Text>
 
-                <View style={styles.priceRow}>
-                    <Text style={styles.price}>{price} тг</Text>
-                    {product.discountPrice && (
-                        <Text style={styles.oldPrice}>{product.price} тг</Text>
-                    )}
+                    <View style={styles.priceRow}>
+                        <Text style={styles.price}>
+                            {product.price !== undefined ? product.price.toLocaleString() : "0"} тг
+                        </Text>
+
+                        {product.discountPrice ? (
+                            <Text style={styles.oldPrice}>
+                                {product.price !== undefined ? product.price.toLocaleString() : "0"} тг
+                            </Text>
+                        ) : null}
+                    </View>
+
+                    <Text style={styles.description}>{product.description}</Text>
+
+                    {renderSpecs()}
                 </View>
-
-                {renderSpecs()}
             </ScrollView>
 
             <View style={styles.bottomBar}>
-                <TouchableOpacity
-                    style={styles.addBtn}
-                    onPress={handleAddToCart}
-                >
+                <TouchableOpacity style={styles.addBtn} onPress={handleAddToCart}>
                     <Text style={styles.addText}>Добавить в корзину</Text>
                 </TouchableOpacity>
             </View>
+
+            <Snackbar
+                visible={snackVisible}
+                onDismiss={() => setSnackVisible(false)}
+                duration={1500}
+                style={{ borderRadius: 12 }}
+            >
+                Товар добавлен в корзину 🛒
+            </Snackbar>
         </View>
     );
 }
 
 const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: "#fff" },
-    back: { position: "absolute", top: 20, left: 15, zIndex: 10 },
-    image: { width: "100%", height: 200, resizeMode: "contain", marginTop: 60 },
-    name: { fontSize: 22, fontWeight: "700", marginTop: 15, marginHorizontal: 15 },
-    description: { fontSize: 15, color: "#555", marginTop: 10, marginHorizontal: 15 },
+    container: { flex: 1, backgroundColor: "#F7F7F7" },
+    back: { position: "absolute", top: 10, left: 10, zIndex: 10 },
+    image: {
+        width: "100%",
+        height: 280,
+        resizeMode: "contain",
+        backgroundColor: "#fff",
+    },
+
+    card: {
+        backgroundColor: "#fff",
+        margin: 15,
+        padding: 18,
+        borderRadius: 14,
+        elevation: 4,
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 3 },
+    },
+
+    name: {
+        fontSize: 22,
+        fontWeight: "700",
+        marginBottom: 12,
+        color: "#222",
+    },
+
     priceRow: {
         flexDirection: "row",
         alignItems: "center",
-        marginTop: 10,
-        marginHorizontal: 15,
+        marginBottom: 12,
     },
-    price: { fontSize: 20, fontWeight: "700", color: "green", marginRight: 10 },
-    oldPrice: { fontSize: 16, color: "#777", textDecorationLine: "line-through" },
-    specs: { marginTop: 15, marginHorizontal: 15 },
+    price: { fontSize: 22, fontWeight: "800", color: "#008000" },
+    oldPrice: {
+        fontSize: 16,
+        color: "#999",
+        marginLeft: 10,
+        textDecorationLine: "line-through",
+    },
+
+    description: {
+        fontSize: 15,
+        lineHeight: 22,
+        color: "#555",
+        marginBottom: 18,
+    },
+
+    specsCard: {
+        backgroundColor: "#F4F6F9",
+        padding: 14,
+        borderRadius: 10,
+    },
+    sectionTitle: {
+        fontSize: 18,
+        fontWeight: "700",
+        marginBottom: 10,
+        color: "#222",
+    },
+    specItem: {
+        fontSize: 15,
+        color: "#444",
+        marginBottom: 4,
+    },
+
     bottomBar: {
         position: "absolute",
         bottom: 0,
         width: "100%",
         padding: 15,
         backgroundColor: "#fff",
-        borderTopWidth: 1,
         borderTopColor: "#E6E6E6",
+        borderTopWidth: 1,
     },
     addBtn: {
         backgroundColor: "#007AFF",
-        paddingVertical: 15,
-        borderRadius: 10,
+        paddingVertical: 16,
+        borderRadius: 12,
         alignItems: "center",
+        elevation: 3,
     },
-    addText: { color: "#fff", fontSize: 16, fontWeight: "700" },
+    addText: {
+        color: "#fff",
+        fontSize: 17,
+        fontWeight: "700",
+    },
+
     empty: { flex: 1, justifyContent: "center", alignItems: "center" },
 });

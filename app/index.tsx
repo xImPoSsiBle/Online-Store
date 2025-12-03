@@ -1,11 +1,10 @@
-import { Redirect } from 'expo-router';
-import React from 'react';
-import { StyleSheet } from 'react-native';
+import { useAppSelector } from "@/hooks/redux";
+import { Redirect } from "expo-router";
 
-const index = () => {
-  return <Redirect href="/(tabs)/cart" />;
+export default function IndexPage() {
+  const isAuth = useAppSelector(s => s.auth.isAuthenticated);
+
+  if (isAuth === undefined) return null;
+
+  return isAuth ? <Redirect href="/(tabs)/home" /> : <Redirect href="/(auth)/login" />;
 }
-
-export default index
-
-const styles = StyleSheet.create({})
