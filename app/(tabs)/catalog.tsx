@@ -1,74 +1,70 @@
-import { useRouter } from "expo-router";
-import React from "react";
+import { useAppSelector } from "@/hooks/redux";
+import { resetSelectedFilters, setCategory } from "@/store/FilterSlice";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch } from "react-redux";
 
-const categories = [
-  {
-    id: "SmartPhone",
-    name: "Телефоны",
-    image: require("../../assets/images/catalog/Phones.png"),
-  },
-  {
-    id: "SmartWatch",
-    name: "Смарт Часы",
-    image: require("../../assets/images/catalog/Smart Watches.png")
-  },
-  {
-    id: "Camera",
-    name: "Камеры",
-    image: require("../../assets/images/catalog/Cameras.png"),
-  },
-  {
-    id: "Headphones",
-    name: "Наушники",
-    image: require("../../assets/images/catalog/Headphones.png"),
-  },
-  {
-    id: "Computers",
-    name: "Компьютеры",
-    image: require("../../assets/images/catalog/Computers.png"),
-  },
-];
-
+interface Category {
+  id: number;
+  name: string;
+  en_name: string;
+  photo: string;
+}
 
 const Catalog = () => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { API } = useAppSelector(state => state.products);
+  const [categories, setCategories] = useState<Category[]>([]);
 
-  const handlePress = (category: string) => {
-    router.push(`../catalog/${category}`);
+  const handlePress = (item: Category) => {
+    dispatch(setCategory({ en_category: item.en_name, category: item.name }));
+    router.push(`/catalog/${item.name}`);
   };
 
+  const getCatalog = async () => {
+    try {
+      const resp = await fetch(`${API}/api/categories/`);
+      const data = await resp.json();
+      setCategories(data); 
+    } catch (err) {
+      console.error("Ошибка загрузки категорий:", err);
+    }
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(resetSelectedFilters());
+    }, [dispatch])
+  );
+
+  useEffect(() => {
+    getCatalog();
+  }, []);
+
   return (
-    <View style={{ padding: 16 }}>
+    <View style={styles.container}>
       <FlatList
         data={categories}
         numColumns={2}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 15,
-              padding: 20,
-              flex: 1,
-              alignItems: "center",
-              margin: 8,
-              elevation: 3,
-            }}
-            onPress={() => handlePress(item.id)}
+            style={styles.card}
+            onPress={() => handlePress(item)}
           >
-            <Image
-              source={item.image}
-              style={{ width: 80, height: 80 }}
-              resizeMode="contain"
-            />
-            <Text style={{ marginTop: 10, fontSize: 16, fontWeight: "600" }}>
-              {item.name}
-            </Text>
+            <View style={styles.imageContainer}>
+              <Image
+                source={{ uri: item.photo }}
+                style={styles.image}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.text}>{item.name}</Text>
           </TouchableOpacity>
         )}
-        keyExtractor={(item) => item.id}
+        contentContainerStyle={{ paddingBottom: 16 }}
       />
     </View>
   );
@@ -80,35 +76,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     padding: 16,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  row: {
-    justifyContent: "space-between",
-  },
   card: {
     backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingVertical: 20,
-    alignItems: "center",
-    justifyContent: "center",
+    borderRadius: 15,
+    padding: 20,
     flex: 1,
-    marginBottom: 16,
-    marginHorizontal: 6,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 6,
-    elevation: 4,
-    borderWidth: 1,
-    borderColor: "#f2f2f2",
+    alignItems: "center",
+    margin: 8,
+    elevation: 3,
   },
   imageContainer: {
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
     borderRadius: 12,
     backgroundColor: "#f9f9f9",
     alignItems: "center",

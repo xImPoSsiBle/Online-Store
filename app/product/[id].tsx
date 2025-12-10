@@ -1,5 +1,6 @@
 import { BackButton } from "@/components/BackButton";
 import FullScreenLoader from "@/components/Loader";
+import Rewies from "@/components/Rewies";
 import { useAppSelector } from "@/hooks/redux";
 import { setIsLoading } from "@/store/ProductsSlice";
 import { useLocalSearchParams } from "expo-router";
@@ -12,13 +13,14 @@ export default function ProductPage() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const dispatch = useDispatch();
     const { accessToken } = useAppSelector(state => state.auth)
+    const { API } = useAppSelector(state => state.products)
 
     const [snackVisible, setSnackVisible] = useState(false);
     const [product, setProduct] = useState({} as any);
 
     const getProduct = async () => {
         dispatch(setIsLoading(true));
-        const resp = await fetch(`http://10.61.194.241:8000/api/products/${id}`);
+        const resp = await fetch(`${API}/api/products/${id}`);
 
         if (!resp.ok) {
             dispatch(setIsLoading(false));
@@ -26,13 +28,12 @@ export default function ProductPage() {
         }
 
         const data = await resp.json();
-        console.log(data);
 
         setProduct({
             ...data,
             price: Number(data.price),
             discountPrice: Number(data.discount_price),
-            category: data.category?.name,
+            category: data.category?.en_name,
             memory: data.details?.memory,
             diagonal: data.details?.diagonal,
             battery: data.details?.battery,
@@ -55,38 +56,29 @@ export default function ProductPage() {
 
 
     const handleAddToCart = async () => {
+        if (product.stock === 0) {
+            alert("Товар отсутствует на складе");
+            return;
+        }
+
         dispatch(setIsLoading(true));
 
-        const resp = await fetch('http://10.61.194.241:8000/api/cart/', {
+        const resp = await fetch(`${API}/api/cart/`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${accessToken}`
             },
             body: JSON.stringify({ product_id: id, quantity: 1 })
-        }
-        );
+        });
 
         if (!resp.ok) {
             dispatch(setIsLoading(false));
             return;
         }
 
-        const data = await resp.json();
-        console.log(data);
-
         dispatch(setIsLoading(false));
-
-        // dispatch(
-        //     addToCart({
-        //         id: product.id,
-        //         name: product.name,
-        //         price: product.discountPrice || product.price,
-        //         quantity: 1,
-        //         image: product.image,
-        //     })
-        // );
-        setSnackVisible(true)
+        setSnackVisible(true);
     };
 
     const price = product.discountPrice || product.price;
@@ -96,7 +88,7 @@ export default function ProductPage() {
 
         if (!product) return null;
 
-        if (product.category === "SmartPhone") {
+        if (product.category === "Phones") {
             if (product.memory !== undefined) specItems.push(`Память: ${product.memory} ГБ`);
             if (product.diagonal !== undefined) specItems.push(`Диагональ: ${product.diagonal}"`);
             if (product.battery !== undefined) specItems.push(`Батарея: ${product.battery} мАч`);
@@ -114,13 +106,13 @@ export default function ProductPage() {
             if (product.graphics_card) specItems.push(`Видеокарта: ${product.graphics_card}`);
         }
 
-        if (product.category === "Gaming") {
+        if (product.category === "Games") {
             if (product.type) specItems.push(`Тип: ${product.type}`);
             if (product.platform) specItems.push(`Платформа: ${product.platform}`);
             if (product.storage_capacity) specItems.push(`Память: ${product.storage_capacity}`);
         }
 
-        if (product.category === "Camera") {
+        if (product.category === "Cameras") {
             if (product.megapixels) specItems.push(`Мегапиксели: ${product.megapixels}`);
             if (product.optical_zoom) specItems.push(`Оптический зум: ${product.optical_zoom}`);
             if (product.digital_zoom) specItems.push(`Цифровой зум: ${product.digital_zoom}`);
@@ -153,33 +145,49 @@ export default function ProductPage() {
             <BackButton style={styles.back} />
 
             <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-                <Image source={{ uri: product.image }} style={styles.image} />
+                <Image source={{ uri: product.photo }} style={styles.image} />
 
                 <View style={styles.card}>
                     <Text style={styles.name}>{product.name}</Text>
 
                     <View style={styles.priceRow}>
-                        <Text style={styles.price}>
-                            {product.price !== undefined ? product.price.toLocaleString() : "0"} тг
-                        </Text>
-
-                        {product.discountPrice ? (
-                            <Text style={styles.oldPrice}>
-                                {product.price !== undefined ? product.price.toLocaleString() : "0"} тг
+                        {product.discount && product.discount > 0 ? (
+                            <>
+                                <View style={styles.oldPriceRow}>
+                                    <Text style={styles.oldPrice}>
+                                        {product.price.toLocaleString()} тг
+                                    </Text>
+                                    <Text style={styles.discountTag}>-{Math.floor(product.discount)}%</Text>
+                                </View>
+                                <Text style={styles.price}>
+                                    {product.discountPrice.toLocaleString()} тг
+                                </Text>
+                            </>
+                        ) : (
+                            <Text style={styles.price}>
+                                {product.price.toLocaleString()} тг
                             </Text>
-                        ) : null}
+                        )}
                     </View>
 
                     <Text style={styles.description}>{product.description}</Text>
 
                     {renderSpecs()}
                 </View>
+
+                <Rewies id={id} />
             </ScrollView>
 
             <View style={styles.bottomBar}>
-                <TouchableOpacity style={styles.addBtn} onPress={handleAddToCart}>
-                    <Text style={styles.addText}>Добавить в корзину</Text>
-                </TouchableOpacity>
+                {product.stock > 0 ? (
+                    <TouchableOpacity style={styles.addBtn} onPress={handleAddToCart}>
+                        <Text style={styles.addText}>Добавить в корзину</Text>
+                    </TouchableOpacity>
+                ) : (
+                    <View style={[styles.addBtn, { backgroundColor: "#888" }]}>
+                        <Text style={styles.addText}>Нет в наличии</Text>
+                    </View>
+                )}
             </View>
 
             <Snackbar
@@ -224,15 +232,13 @@ const styles = StyleSheet.create({
     },
 
     priceRow: {
-        flexDirection: "row",
-        alignItems: "center",
+        flexDirection: "column",
         marginBottom: 12,
     },
     price: { fontSize: 22, fontWeight: "800", color: "#008000" },
     oldPrice: {
         fontSize: 16,
         color: "#999",
-        marginLeft: 10,
         textDecorationLine: "line-through",
     },
 
@@ -282,5 +288,22 @@ const styles = StyleSheet.create({
         fontWeight: "700",
     },
 
-    empty: { flex: 1, justifyContent: "center", alignItems: "center" },
+    empty: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+    },
+    discountTag: {
+        marginLeft: 10,
+        fontSize: 15,
+        color: "white",
+        backgroundColor: "red",
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 6,
+        overflow: "hidden",
+    },
+    oldPriceRow: {
+        flexDirection: "row",
+    },
 });

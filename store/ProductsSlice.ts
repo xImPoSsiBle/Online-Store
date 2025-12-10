@@ -1,16 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export type ProductBase = {
-  id: string;
+export type Category = {
+  id: number;
+  name: string;
+};
+
+export type ProductFromAPI = {
+  id: number;
   name: string;
   description?: string;
-  price: number;
-  discountPrice?: number;
-  discountPercent?: string;
-  rating?: number;
-  category: string;
-  image: string;
+  price: string;
+  discount_price?: string;
+  discount?: string;
+  stock: number;
+  photo: string;
+  category: Category;
+  details?: any;
+  average_rating?: number;
+  favorite?: boolean;
 };
+
+export type ProductBase = Omit<ProductFromAPI, "details">;
 
 export type SmartPhoneOrWatchSpecs = {
   memory: number;
@@ -42,71 +52,27 @@ export type CameraSpecs = {
   digital_zoom: string;
 };
 
-export type Product = ProductBase & Partial<SmartPhoneOrWatchSpecs & HeadphonesSpecs & ComputersSpecs & GamingSpecs & CameraSpecs>;
-
-// const initialProducts: Product[] = [
-//   {
-//     id: "1",
-//     name: "Apple MacBook Pro Core i9 9th Gen",
-//     price: 2000000,
-//     discountPrice: 1000000,
-//     discountPercent: "-50%",
-//     rating: 4.6,
-//     category: "Computers",
-//     image: "https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/mbp16touch-silver-select-201911?wid=1808&hei=1686&fmt=jpeg&qlt=90&.v=1573165439156",
-//     description: "Мощный ноутбук для профессионалов с процессором Intel Core i9 и графикой Radeon Pro.",
-//     processor: "Intel Core i9",
-//     ram: "32GB",
-//     graphics_card: "AMD Radeon Pro 5500M",
-//   },
-//   {
-//     id: "2",
-//     name: "JBL T450BT Extra Bass",
-//     price: 35000,
-//     discountPrice: 28000,
-//     discountPercent: "-20%",
-//     rating: 4.6,
-//     category: "Headphones",
-//     image: "https://m.media-amazon.com/images/I/71ynIMjwgwL._AC_SL1500_.jpg",
-//     description: "Беспроводные наушники с глубоким басом, Bluetooth 5.0 и длительным временем работы.",
-//     connection_type: "Bluetooth",
-//     bluetooth_version: "5.0",
-//     battery_life: "11 часов",
-//   },
-//   {
-//     id: "3",
-//     name: "Canon EOS 90D DSLR Camera Body",
-//     price: 550000,
-//     discountPrice: 495000,
-//     discountPercent: "-10%",
-//     rating: 4.6,
-//     category: "Camera",
-//     image: "https://pspdf.kz/image/catalog/products/camera/canon/90d/18-135f3.5-5.6/1.jpg",
-//     description: "Зеркальная камера высокого разрешения для фото и видео со множеством профессиональных функций.",
-//     megapixels: 32.5,
-//     optical_zoom: "3x",
-//     digital_zoom: "10x",
-//   },
-//   {
-//     id: "4",
-//     name: "Samsung Galaxy S23 5G",
-//     price: 124000,
-//     rating: 4.6,
-//     category: "SmartPhone",
-//     image: "https://resources.cdn-kaspi.kz/img/m/p/h9b/h20/69065028435998.jpg?format=gallery-medium",
-//     description: "Флагманский смартфон с ярким экраном, быстрым процессором и мощной камерой.",
-//     memory: 128,
-//     diagonal: 6.1,
-//     battery: 3900,
-//   },
-// ];
-
+export type Product = {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  discountPrice?: number;
+  discountPercent?: string;
+  stock: number;
+  photo: string;
+  category: string;
+  details?: any;
+  average_rating?: number;
+  favorite?: boolean;
+};
 
 type State = {
   products: Product[];
   search: string;
   selectedCategory: string | null;
   isLoading: boolean;
+  API: string;
 };
 
 const initialState: State = {
@@ -114,6 +80,33 @@ const initialState: State = {
   search: "",
   selectedCategory: null,
   isLoading: false,
+  API: "http://172.20.10.4:8000/"
+};
+
+export const mapProductFromAPI = (p: ProductFromAPI): Product => {
+  let imageUrl = p.photo || "";
+
+  if (imageUrl.includes('https%3A')) {
+    const decoded = decodeURIComponent(imageUrl.replace(/^\/media\//, ''));
+    imageUrl = decoded.startsWith('http') ? decoded : `https:${decoded}`;
+  } else if (imageUrl.startsWith('/media/')) {
+    imageUrl = `${process.env.API || 'http://192.168.0.247:8000'}${imageUrl}`;
+  }
+
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    price: parseFloat(p.price),
+    discountPrice: p.discount_price ? parseFloat(p.discount_price) : undefined,
+    discountPercent: p.discount,
+    stock: p.stock,
+    photo: imageUrl,
+    category: p.category.name,
+    details: p.details,
+    average_rating: p.average_rating,
+    favorite: p.favorite
+  };
 };
 
 export const productsSlice = createSlice({
@@ -136,8 +129,8 @@ export const productsSlice = createSlice({
     setIsLoading(state, action: PayloadAction<boolean>) {
       state.isLoading = action.payload;
     },
-    setProducts(state, action: PayloadAction<Product[]>) {
-      state.products = action.payload;
+    setProducts(state, action: PayloadAction<ProductFromAPI[]>) {
+      state.products = action.payload.map(mapProductFromAPI);
     }
   },
 });

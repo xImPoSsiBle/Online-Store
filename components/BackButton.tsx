@@ -10,7 +10,13 @@ export const BackButton = ({ to, style }: { to?: RouterPath; style?: any }) => {
     <IconButton
       icon="arrow-left"
       size={26}
-      onPress={() => router.back()}
+      onPress={() => {
+        if (to) {
+          router.push(to); 
+        } else {
+          router.back();
+        }
+      }}
       style={[style]}
     />
   );

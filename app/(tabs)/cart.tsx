@@ -1,9 +1,9 @@
 import { useAppSelector } from "@/hooks/redux";
-import { changeQuantity, removeFromCart, setCartItems } from "@/store/CartSlice";
+import { setCartItems } from "@/store/CartSlice";
 import { setIsLoading } from "@/store/ProductsSlice";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import { useDispatch } from "react-redux";
@@ -14,7 +14,7 @@ const Cart = () => {
 
   const cartItems = useAppSelector(state => state.cart.items);
   const { accessToken } = useAppSelector(state => state.auth);
-  const { isLoading } = useAppSelector(state => state.products);
+  const { API } = useAppSelector(state => state.products);
   const dispatch = useDispatch();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -23,7 +23,7 @@ const Cart = () => {
   const getCart = async () => {
     dispatch(setIsLoading(true));
     try {
-      const response = await fetch("http://10.61.194.241:8000/api/cart/", {
+      const response = await fetch(`${API}/api/cart/`, {
         method: "GET",
         headers: {
           'Authorization': `Bearer ${accessToken}`
@@ -38,9 +38,9 @@ const Cart = () => {
       const data = await response.json();
 
       const mappedItems = data.map((i: any) => ({
-        id: i.product.id.toString(),
+        id: i.id.toString(),
         name: i.product.name,
-        price: Number(i.product.discount_price || i.product.price),
+        price: Number(Math.floor(i.product.discount) === 0 ? i.product.price : i.product.discount_price),
         quantity: i.quantity,
         image: i.product.photo || "https://via.placeholder.com/100"
       }));
@@ -53,10 +53,54 @@ const Cart = () => {
     }
   };
 
+  const handleRemoveFromCart = async (id: string) => {
+    const response = await fetch(`${API}/api/cart/${id}/`, {
+      method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
 
-  useEffect(() => {
-    getCart();
-  }, [])
+    if (!response.ok) {
+      return;
+    }
+
+    getCart()
+  };
+
+  const handleUpdateQuantity = async (id: string, quantity: number) => {
+    try {
+      if (quantity <= 0) {
+        handleRemoveFromCart(id);
+        return;
+      }
+
+      const response = await fetch(`${API}/api/cart/${id}/`, {
+        method: "PATCH",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity })
+      });
+
+      if (!response.ok) {
+        console.log("Ошибка при обновлении количества");
+        return;
+      }
+
+      getCart();
+
+    } catch (error) {
+      console.log("Ошибка PATCH запроса:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getCart();
+    }, [])
+  );
 
   if (cartItems.length === 0) {
     return (
@@ -97,14 +141,14 @@ const Cart = () => {
               <Text style={styles.price}>{item.price?.toLocaleString() || "0"} тг</Text>
               <Text style={styles.stock}>Осталось 3 шт</Text>
               <View style={styles.controls}>
-                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: -1 }))}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}>
                   <Text style={styles.qtyText}>–</Text>
                 </TouchableOpacity>
                 <Text style={styles.qtyNum}>{item.quantity}</Text>
-                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: 1 }))}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}>
                   <Text style={styles.qtyText}>+</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.trashBtn} onPress={() => dispatch(removeFromCart(item.id))}>
+                <TouchableOpacity style={styles.trashBtn} onPress={() => handleRemoveFromCart(String(item.id))}>
                   <Text style={styles.trashText}>Удалить</Text>
                 </TouchableOpacity>
               </View>
@@ -221,8 +265,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    backgroundColor: '#F8F8FF',
     padding: 20,
+    backgroundColor: "#fff",
   },
   emptyContent: {
     flex: 1,
