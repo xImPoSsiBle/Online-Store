@@ -1,14 +1,21 @@
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { logout } from '@/store/AuthSlice';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 const Profile = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { accessToken, username } = useAppSelector(state => state.auth)
 
   const settings = [
     { id: '1', title: 'Мои заказы', navigateTo: '/(profile)/Orders' },
     { id: '2', title: 'Редактировать профиль', navigateTo: '/(profile)/EditProfile' },
+    { id: '3', title: 'Моя карта', navigateTo: '/(profile)/AddCard' },
+    { id: '4', title: 'Избранные', navigateTo: '/(profile)/Favorites' },
   ] as const;
+
 
   return (
     <View style={styles.container}>
@@ -16,9 +23,7 @@ const Profile = () => {
         source={{ uri: 'https://e7.pngegg.com/pngimages/84/165/png-clipart-united-states-avatar-organization-information-user-avatar-service-computer-wallpaper.png' }}
         style={styles.avatar}
       />
-      <Text style={styles.name}>Rza Rzaev</Text>
-      <Text style={styles.info}>Телефон: +7 701 123 45 67</Text>
-      <Text style={styles.info}>Email: rza@example.com</Text>
+      <Text style={styles.name}>{username}</Text>
 
       <View style={styles.tabsContainer}>
         {settings.map((item) => (
@@ -31,6 +36,16 @@ const Profile = () => {
             <Text style={styles.arrow}>›</Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity
+          style={styles.tabRow}
+          onPress={() => {
+            dispatch(logout());
+            router.push('/(auth)/login');
+          }}
+        >
+          <Text style={styles.tabText}>Выйти</Text>
+          <Text style={styles.arrow}>›</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -41,7 +56,7 @@ export default Profile;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F2F2F7',
+    backgroundColor: '#fff',
     alignItems: 'center',
     paddingTop: 50,
   },
@@ -76,6 +91,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderBottomWidth: 1,
     borderBottomColor: '#E5E5EA',
+    backgroundColor: '#f2f2f2ff',
   },
   tabText: {
     fontSize: 16,
