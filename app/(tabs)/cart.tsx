@@ -1,7 +1,9 @@
 import { useAppSelector } from "@/hooks/redux";
-import { changeQuantity, removeFromCart } from "@/store/CartSlice";
+import { setCartItems } from "@/store/CartSlice";
+import { setIsLoading } from "@/store/ProductsSlice";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback } from "react";
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Animatable from 'react-native-animatable';
 import { useDispatch } from "react-redux";
@@ -11,9 +13,94 @@ const Cart = () => {
   const router = useRouter();
 
   const cartItems = useAppSelector(state => state.cart.items);
+  const { accessToken } = useAppSelector(state => state.auth);
+  const { API } = useAppSelector(state => state.products);
   const dispatch = useDispatch();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+
+  const getCart = async () => {
+    dispatch(setIsLoading(true));
+    try {
+      const response = await fetch(`${API}/api/cart/`, {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+
+      if (!response.ok) {
+        dispatch(setIsLoading(false));
+        return;
+      }
+
+      const data = await response.json();
+
+      const mappedItems = data.map((i: any) => ({
+        id: i.id.toString(),
+        name: i.product.name,
+        price: Number(Math.floor(i.product.discount) === 0 ? i.product.price : i.product.discount_price),
+        quantity: i.quantity,
+        image: i.product.photo || "https://via.placeholder.com/100"
+      }));
+
+      dispatch(setCartItems(mappedItems));
+    } catch (error) {
+      console.log("Error fetching cart:", error);
+    } finally {
+      dispatch(setIsLoading(false));
+    }
+  };
+
+  const handleRemoveFromCart = async (id: string) => {
+    const response = await fetch(`${API}/api/cart/${id}/`, {
+      method: "DELETE",
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      }
+    });
+
+    if (!response.ok) {
+      return;
+    }
+
+    getCart()
+  };
+
+  const handleUpdateQuantity = async (id: string, quantity: number) => {
+    try {
+      if (quantity <= 0) {
+        handleRemoveFromCart(id);
+        return;
+      }
+
+      const response = await fetch(`${API}/api/cart/${id}/`, {
+        method: "PATCH",
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ quantity })
+      });
+
+      if (!response.ok) {
+        console.log("Ошибка при обновлении количества");
+        return;
+      }
+
+      getCart();
+
+    } catch (error) {
+      console.log("Ошибка PATCH запроса:", error);
+    }
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getCart();
+    }, [])
+  );
 
   if (cartItems.length === 0) {
     return (
@@ -26,7 +113,7 @@ const Cart = () => {
             Вы ещё не добавили товары в корзину. Перейдите в каталог и выберите понравившиеся товары 🛒
           </Text>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.emptyButton}
             onPress={() => router.push("/catalog")}
           >
@@ -45,24 +132,23 @@ const Cart = () => {
 
       <FlatList
         data={cartItems}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
+        keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.card}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image source={{ uri: item.image || "https://via.placeholder.com/90" }} style={styles.image} />
             <View style={{ flex: 1 }}>
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.price}>{item.price.toLocaleString()} тг</Text>
+              <Text style={styles.name}>{item.name || "Без названия"}</Text>
+              <Text style={styles.price}>{item.price?.toLocaleString() || "0"} тг</Text>
               <Text style={styles.stock}>Осталось 3 шт</Text>
               <View style={styles.controls}>
-                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: -1 }))}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => handleUpdateQuantity(item.id, item.quantity - 1)}>
                   <Text style={styles.qtyText}>–</Text>
                 </TouchableOpacity>
                 <Text style={styles.qtyNum}>{item.quantity}</Text>
-                <TouchableOpacity style={styles.quantityBtn} onPress={() => dispatch(changeQuantity({ id: item.id, amount: 1 }))}>
+                <TouchableOpacity style={styles.quantityBtn} onPress={() => handleUpdateQuantity(item.id, item.quantity + 1)}>
                   <Text style={styles.qtyText}>+</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.trashBtn} onPress={() => dispatch(removeFromCart(item.id))}>
+                <TouchableOpacity style={styles.trashBtn} onPress={() => handleRemoveFromCart(String(item.id))}>
                   <Text style={styles.trashText}>Удалить</Text>
                 </TouchableOpacity>
               </View>
@@ -70,6 +156,7 @@ const Cart = () => {
           </View>
         )}
       />
+
 
       {cartItems.length !== 0 && <View style={styles.summaryBox}>
         <Text style={styles.delivery}>
@@ -176,10 +263,10 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
   },
-    emptyContainer: {
+  emptyContainer: {
     flex: 1,
-    backgroundColor: '#F8F8FF',
     padding: 20,
+    backgroundColor: "#fff",
   },
   emptyContent: {
     flex: 1,

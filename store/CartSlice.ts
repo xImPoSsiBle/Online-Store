@@ -8,12 +8,20 @@ export type CartItem = {
   image: string;
 };
 
+export type Card = {
+  card_number: string;
+};
+
 type State = {
   items: CartItem[];
+  selectedCard: string | null;
+  cards: Card[];
 };
 
 const initialState: State = {
   items: [],
+  selectedCard: null,
+  cards: [],
 };
 
 export const cartSlice = createSlice({
@@ -43,11 +51,31 @@ export const cartSlice = createSlice({
         }
       }
     },
-    clearCart(state){
-        state.items = []
-    }
+    clearCart(state) {
+      state.items = [];
+      state.selectedCard = null; 
+    },
+    setCartItems(state, action: PayloadAction<CartItem[]>) {
+      state.items = action.payload;
+      console.log("items: ", state.items);
+    },
+    setSelectedCard(state, action: PayloadAction<string | null>) {
+      state.selectedCard = action.payload;
+    },
+    setCards(state, action: PayloadAction<Card[]>) {
+      state.cards = action.payload;
+    },
   },
 });
 
-export const { addToCart, removeFromCart, changeQuantity, clearCart } = cartSlice.actions;
+export const { 
+  addToCart, 
+  removeFromCart, 
+  changeQuantity, 
+  clearCart, 
+  setCartItems,
+  setSelectedCard,
+  setCards
+} = cartSlice.actions;
+
 export default cartSlice.reducer;
