@@ -1,6 +1,8 @@
 import { BackButton } from '@/components/BackButton';
+
 import { useAppSelector } from '@/hooks/redux';
 import * as ImagePicker from 'expo-image-picker';
+
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -33,6 +35,7 @@ const EditProfile = () => {
     if (!result.canceled) {
       setAvatar(result.assets[0].uri);
     }
+
   };
 
   const saveProfile = async () => {

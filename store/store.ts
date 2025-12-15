@@ -5,6 +5,7 @@ import filterReducer from "./FilterSlice";
 import ordersReducer from "./OrdersSlice";
 import productsReducer from "./ProductsSlice";
 
+
 export const store = configureStore({
   reducer: {
     products: productsReducer,

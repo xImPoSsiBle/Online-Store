@@ -48,7 +48,7 @@ export default function Register() {
 
     dispatch(setIsLoading(false));
 
-    router.replace("/login");
+    router.replace("./login");
   };
 
   return (
@@ -105,7 +105,7 @@ export default function Register() {
       </Button>
 
       <Text style={styles.linkText}>
-        Уже есть аккаунт? <Link href="/login" style={{ color: "#007AFF" }}>Войти</Link>
+        Уже есть аккаунт? <Link href="./login" style={{ color: "#007AFF" }}>Войти</Link>
       </Text>
     </View>
   );
