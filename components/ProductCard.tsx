@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/hooks/redux";
 import { Product } from "@/store/ProductsSlice";
-import { Ionicons } from "@expo/vector-icons"; // для иконки сердечка
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -20,8 +20,6 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
   const { API } = useAppSelector(state => state.products);
 
   const [isFavorite, setIsFavorite] = useState(item.favorite ?? false);
-
-  console.log(item.favorite);
 
   const handleAddToCart = async () => {
     try {
@@ -45,7 +43,9 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
 
   const handleToggleFavorite = async () => {
     try {
-      const url = `${API}/api/favorites/`;
+      const url = isFavorite
+        ? `${API}/api/favorites/by-product/${item.id}/`
+        : `${API}/api/favorites/`;
       const method = isFavorite ? "DELETE" : "POST";
 
       const resp = await fetch(url, {
@@ -59,8 +59,6 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
 
       if (resp.ok) {
         setIsFavorite(!isFavorite);
-        const data = await resp.json();
-        console.log("Избранное обновлено:", data);
       } else {
         console.log("Ошибка при обновлении избранного:", resp.status);
       }
@@ -68,7 +66,7 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
       console.log(error);
     }
   };
-
+console.log(item)
   const price = Number(item.price) || 0;
   const discountPrice = item.discountPrice ? Number(item.discountPrice) : null;
   const finalPrice = discountPrice && discountPrice < price ? discountPrice : price;
@@ -77,17 +75,28 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
   const renderRatingStars = () => {
     const rawRating = item.average_rating ?? 0;
     const rating = Math.round(rawRating * 2) / 2;
+
     const fullStars = Math.floor(rating);
     const halfStar = rating % 1 === 0.5;
     const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+
     return (
-      <Text style={styles.rating}>
-        {"★".repeat(fullStars)}
-        {halfStar ? "⯪" : ""}
-        {"☆".repeat(emptyStars)}
-      </Text>
+      <View style={{ flexDirection: "row", marginBottom: 6 }}>
+        {Array.from({ length: fullStars }).map((_, i) => (
+          <Ionicons key={`full-${i}`} name="star" size={14} color="#f1c40f" />
+        ))}
+
+        {halfStar && (
+          <Ionicons name="star-half" size={14} color="#f1c40f" />
+        )}
+
+        {Array.from({ length: emptyStars }).map((_, i) => (
+          <Ionicons key={`empty-${i}`} name="star-outline" size={14} color="#f1c40f" />
+        ))}
+      </View>
     );
   };
+
 
   return (
     <TouchableOpacity
@@ -98,29 +107,30 @@ export default function ProductCard({ item, onAddedToCart, horizontal, setLastAd
 
       <View style={styles.favoriteRow}>
         <Text style={styles.name} numberOfLines={1}>{item.name}</Text>
-        <TouchableOpacity onPress={handleToggleFavorite}>
-          <Ionicons 
-            name={isFavorite ? "heart" : "heart-outline"} 
-            size={22} 
-            color={isFavorite ? "red" : "#888"} 
+        <TouchableOpacity onPress={handleToggleFavorite} style={styles.favoriteBtn}>
+          <Ionicons
+            name={isFavorite ? "heart" : "heart-outline"}
+            size={22}
+            color={isFavorite ? "red" : "#888"}
           />
         </TouchableOpacity>
       </View>
 
       {renderRatingStars()}
 
-      <View style={styles.priceRow}>
+      <View style={[styles.priceContainer, discountPercent ? {} : { marginBottom: 10 }]}>
         {discountPercent ? (
           <>
-            <Text style={styles.oldPrice}>{price.toLocaleString()} ₸</Text>
-            <Text style={styles.discountTag}>-{discountPercent}%</Text>
+            <View style={styles.priceRow}>
+              <Text style={styles.oldPrice}>{price.toLocaleString()} ₸</Text>
+              <Text style={styles.discountTag}>-{discountPercent}%</Text>
+            </View>
+            <Text style={styles.price}>{finalPrice.toLocaleString()} ₸</Text>
           </>
         ) : (
-          <Text style={styles.oldPrice}></Text>
+          <Text style={styles.price}>{finalPrice.toLocaleString()} ₸</Text>
         )}
       </View>
-
-      <Text style={styles.price}>{finalPrice.toLocaleString()} ₸</Text>
 
       {item.stock > 0 ? (
         <TouchableOpacity style={styles.addBtn} onPress={handleAddToCart}>
@@ -140,14 +150,18 @@ const styles = StyleSheet.create({
   cardHorizontal: { width: 180, backgroundColor: "#fff", borderRadius: 12, padding: 10, marginRight: 10 },
   image: { width: "100%", height: 140, resizeMode: "contain", marginBottom: 10 },
   favoriteRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
-  name: { fontSize: 14, fontWeight: "500", marginBottom: 2 },
+  name: { fontSize: 14, fontWeight: "500", marginBottom: 4, maxWidth: "85%" },
   rating: { fontSize: 12, color: "#f1c40f", marginBottom: 6 },
+  priceContainer: { minHeight: 40, justifyContent: "center", marginBottom: 6 },
   priceRow: { flexDirection: "row", alignItems: "center", marginBottom: 3 },
-  price: { fontSize: 16, fontWeight: "700", color: "green", marginRight: 6 },
-  oldPrice: { textDecorationLine: "line-through", fontSize: 13, color: "#999", marginBottom: 6, marginRight: 6 },
+  price: { fontSize: 16, fontWeight: "700", color: "green" },
+  oldPrice: { textDecorationLine: "line-through", fontSize: 13, color: "#999", marginRight: 6 },
   discountTag: { fontSize: 13, backgroundColor: "red", color: "white", paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6 },
   addBtn: { backgroundColor: "#000", paddingVertical: 8, borderRadius: 6, marginTop: 10 },
   addText: { color: "#fff", textAlign: "center", fontWeight: "600" },
   outOfStockBtn: { backgroundColor: "#888", paddingVertical: 8, borderRadius: 6, marginTop: 10 },
   outOfStockText: { color: "#fff", textAlign: "center", fontWeight: "600" },
+  favoriteBtn: {
+    // position: "relative",
+  }
 });

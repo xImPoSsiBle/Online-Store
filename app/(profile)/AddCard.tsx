@@ -1,6 +1,7 @@
 import { BackButton } from '@/components/BackButton';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
 import { setSelectedCard } from '@/store/CartSlice';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -106,17 +107,33 @@ const AddCard = () => {
 
     const renderCard = ({ item }: { item: Card }) => {
         const isSelected = selectedCardNumber === item.card_number;
+
         return (
             <TouchableOpacity
+                activeOpacity={0.9}
+                onPress={() => selectCard(item)}
                 style={[
                     styles.cardWrapper,
-                    isSelected && styles.selectedCardWrapper
+                    isSelected && styles.cardSelected,
                 ]}
-                onPress={() => selectCard(item)}
-                activeOpacity={0.9}
             >
-                <View style={styles.cardGradient}>
-                    <Text style={styles.cardNumber}>**** **** **** {item.card_number.slice(-4)}</Text>
+                <View
+                    style={[
+                        styles.card,
+                        !isSelected && styles.cardNotSelected,
+                    ]}
+                >
+                    {isSelected && (
+                        <View style={styles.checkIcon}>
+                            <MaterialIcons name="check-circle" size={22} color="#1e90ff" />
+                        </View>
+                    )}
+
+                    <Text style={styles.cardLabel}>VISA</Text>
+
+                    <Text style={styles.cardNumber}>
+                        **** **** **** {item.card_number.slice(-4)}
+                    </Text>
                 </View>
             </TouchableOpacity>
         );
@@ -190,18 +207,13 @@ const styles = StyleSheet.create({
     title: { fontSize: 22, fontWeight: '700', color: '#111', marginLeft: 10 },
     input: { padding: 12, borderRadius: 10, backgroundColor: '#fff', fontSize: 16, marginBottom: 15 },
     smallInput: { paddingVertical: 10, fontSize: 14 },
-    button: { backgroundColor: '#1e90ff', paddingVertical: 14, borderRadius: 10, marginTop: 10 },
+    button: { backgroundColor: '#000', paddingVertical: 14, borderRadius: 10, marginTop: 10 },
     buttonText: { color: '#fff', fontSize: 16, textAlign: 'center', fontWeight: '600' },
     cardText: {
         fontSize: 16,
         fontWeight: '600',
         color: '#fff',
         letterSpacing: 1.5,
-    },
-    cardWrapper: {
-        width: 160,
-        height: 100,
-        borderRadius: 16,
     },
     selectedCardWrapper: {
         borderWidth: 2,
@@ -215,22 +227,72 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         backgroundColor: '#888',
     },
+    cardCVC: {
+        fontSize: 12,
+        color: '#fff',
+    },
+    cardWrapper: {
+        width: 180,
+        height: 110,
+        margin: 12,
+        borderRadius: 10
+    },
+
+    cardSelected: {
+        transform: [{ scale: 1.05 }],
+        shadowColor: '#1e90ff',
+        shadowOpacity: 0.35,
+        shadowRadius: 10,
+        elevation: 6,
+    },
+
+    card: {
+        flex: 1,
+        borderRadius: 10,
+        padding: 16,
+        justifyContent: 'space-between',
+        backgroundColor: '#1e1e1e',
+    },
+
+    cardNotSelected: {
+        opacity: 0.6,
+    },
+
+    cardLabel: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: '700',
+        letterSpacing: 1,
+    },
+
     cardNumber: {
+        color: '#fff',
         fontSize: 16,
         fontWeight: '600',
-        color: '#fff',
         letterSpacing: 2,
     },
+
     cardFooter: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: 'center',
     },
+
+    cardName: {
+        fontSize: 10,
+        color: '#aaa',
+    },
+
     cardExpiry: {
         fontSize: 12,
         color: '#fff',
     },
-    cardCVC: {
-        fontSize: 12,
-        color: '#fff',
+
+    checkIcon: {
+        position: 'absolute',
+        top: -8,
+        right: -8,
+        backgroundColor: '#fff',
+        borderRadius: 20,
     },
 });

@@ -100,6 +100,7 @@ export default function Login() {
                 visible={snackVisible}
                 onDismiss={() => setSnackVisible(false)}
                 duration={1500}
+                wrapperStyle={{ right: 20 }}
             >
                 Неверный логин или пароль
             </Snackbar>

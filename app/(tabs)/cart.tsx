@@ -110,14 +110,14 @@ const Cart = () => {
           <MaterialCommunityIcons name="cart-off" size={80} color="#aaa" />
           <Text style={styles.emptyTitle}>Ваша корзина пуста</Text>
           <Text style={styles.emptySubtitle}>
-            Вы ещё не добавили товары в корзину. Перейдите в каталог и выберите понравившиеся товары 🛒
+            Вы ещё не добавили товары в корзину. Перейдите на главную и выберите понравившиеся товары 🛒
           </Text>
 
           <TouchableOpacity
             style={styles.emptyButton}
-            onPress={() => router.push("/catalog")}
+            onPress={() => router.push("/home")}
           >
-            <Text style={styles.emptyButtonText}>Перейти в каталог</Text>
+            <Text style={styles.emptyButtonText}>Перейти на главную</Text>
           </TouchableOpacity>
         </Animatable.View>
       </View>

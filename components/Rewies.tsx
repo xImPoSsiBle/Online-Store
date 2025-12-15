@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
         fontSize: 15
     },
     sendBtn: {
-        backgroundColor: "#007AFF",
+        backgroundColor: "#000",
         paddingVertical: 14,
         borderRadius: 10,
         alignItems: "center"

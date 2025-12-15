@@ -1,11 +1,12 @@
 import { BackButton } from "@/components/BackButton";
 import CartSnackbar from "@/components/CartSnackbar";
 import ProductCard from "@/components/ProductCard";
+import SearchBar from "@/components/SearchBar";
 import { useAppSelector } from "@/hooks/redux";
 import { setIsLoading, setProducts } from "@/store/ProductsSlice";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 export default function CategoryPage() {
@@ -13,7 +14,7 @@ export default function CategoryPage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { API, isLoading, products } = useAppSelector(state => state.products);
+  const { API, isLoading, products, selectedCategory } = useAppSelector(state => state.products);
 
   const categoryParam = Array.isArray(category) ? category[0] : category;
 
@@ -69,20 +70,15 @@ export default function CategoryPage() {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <BackButton to={'/catalog'} />
-        <Text style={styles.headerTitle}>{categoryParam}</Text>
+        <BackButton to={'/home'} />
+        <Text style={styles.headerTitle}>{category}</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 10 }}>
-        <TextInput
-          placeholder="Поиск..."
-          style={{ flex: 1, borderWidth: 1, borderColor: '#ccc', borderRadius: 8, padding: 8, marginRight: 10 }}
-          value={searchText}
-          onChangeText={setSearchText}
-        />
+        <SearchBar style={{width: '75%', marginRight: 10}}/>
         <TouchableOpacity
-          style={{ padding: 10, backgroundColor: '#007AFF', borderRadius: 8 }}
+          style={{ padding: 10, backgroundColor: '#000', borderRadius: 8, marginBottom: 10 }}
           onPress={goToFilterPage}
         >
           <Text style={{ color: '#fff' }}>Фильтры</Text>
@@ -111,7 +107,6 @@ export default function CategoryPage() {
           )}
         />
       )}
-
 
       <CartSnackbar
         visible={snackVisible}

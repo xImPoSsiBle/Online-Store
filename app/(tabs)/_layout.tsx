@@ -9,7 +9,7 @@ export default function TabsLayout() {
           let iconName;
 
           if (route.name === 'home') iconName = 'home-outline';
-          else if (route.name === 'catalog') iconName = 'apps-outline';
+          // else if (route.name === 'catalog') iconName = 'apps-outline';
           else if (route.name === 'cart') iconName = 'cart-outline';
           else if (route.name == "profile") iconName = 'person-outline'
 
@@ -37,13 +37,13 @@ export default function TabsLayout() {
         }}
       />
 
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="catalog"
         options={{
           title: 'Каталог',
           headerShown: false,
         }}
-      />
+      /> */}
 
       <Tabs.Screen
         name="cart"

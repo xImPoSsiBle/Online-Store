@@ -67,8 +67,16 @@ export type Product = {
   favorite?: boolean;
 };
 
+export type Categories = {
+  id: number;
+  name: string;
+  en_name: string;
+  photo?: string;
+}
+
 type State = {
   products: Product[];
+  categories: Categories[];
   search: string;
   selectedCategory: string | null;
   isLoading: boolean;
@@ -77,21 +85,23 @@ type State = {
 
 const initialState: State = {
   products: [],
+  categories: [],
   search: "",
   selectedCategory: null,
   isLoading: false,
-  API: "http://172.20.10.4:8000/"
+  API: "http://10.61.194.241:8000/"
 };
 
 export const mapProductFromAPI = (p: ProductFromAPI): Product => {
-  let imageUrl = p.photo || "";
+  // let imageUrl = p.photo || "";
 
-  if (imageUrl.includes('https%3A')) {
-    const decoded = decodeURIComponent(imageUrl.replace(/^\/media\//, ''));
-    imageUrl = decoded.startsWith('http') ? decoded : `https:${decoded}`;
-  } else if (imageUrl.startsWith('/media/')) {
-    imageUrl = `${process.env.API || 'http://192.168.0.247:8000'}${imageUrl}`;
-  }
+  // if (imageUrl.includes('https%3A')) {
+  //   const decoded = decodeURIComponent(imageUrl.replace(/^\/media\//, ''));
+  //   imageUrl = decoded.startsWith('http') ? decoded : `https:${decoded}`;
+  // } else if (imageUrl.startsWith('/media/')) {
+  //   imageUrl = `${process.env.API || 'http://192.168.0.247:8000'}${imageUrl}`;
+  // }  
+
 
   return {
     id: p.id,
@@ -101,7 +111,7 @@ export const mapProductFromAPI = (p: ProductFromAPI): Product => {
     discountPrice: p.discount_price ? parseFloat(p.discount_price) : undefined,
     discountPercent: p.discount,
     stock: p.stock,
-    photo: imageUrl,
+    photo: p.photo,
     category: p.category.name,
     details: p.details,
     average_rating: p.average_rating,
@@ -131,9 +141,18 @@ export const productsSlice = createSlice({
     },
     setProducts(state, action: PayloadAction<ProductFromAPI[]>) {
       state.products = action.payload.map(mapProductFromAPI);
+    },
+    setProductFavorite: (state, action: { payload: { id: number; favorite: boolean } }) => {
+      const index = state.products.findIndex(p => p.id === action.payload.id);
+      if (index !== -1) {
+        state.products[index].favorite = action.payload.favorite;
+      }
+    },
+    setCategories(state, action: PayloadAction<Categories[]>) {
+      state.categories = action.payload;
     }
   },
 });
 
-export const { setSearch, setCategory, addProduct, updateProduct, setIsLoading, setProducts } = productsSlice.actions;
+export const { setSearch, setCategory, addProduct, updateProduct, setIsLoading, setProducts, setProductFavorite, setCategories } = productsSlice.actions;
 export default productsSlice.reducer;

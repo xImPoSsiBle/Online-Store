@@ -1,9 +1,10 @@
 import { BackButton } from "@/components/BackButton";
+import FullScreenLoader from "@/components/Loader";
 import { useAppSelector } from "@/hooks/redux";
 import { setIsLoading } from "@/store/ProductsSlice";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, StyleSheet, Text, View } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 import { useDispatch } from "react-redux";
 
 export default function OrderDetails() {
@@ -30,7 +31,7 @@ export default function OrderDetails() {
                     headers: { 'Authorization': `Bearer ${accessToken}` }
                 });
                 const addressData = await addressResp.json();
-
+                console.log(orderData.items[0].product)
                 setOrder({ ...orderData, address: addressData });
             } catch (err: any) {
                 console.error(err);
@@ -45,9 +46,7 @@ export default function OrderDetails() {
 
     if (isLoading) {
         return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <ActivityIndicator size="large" color="#007AFF" />
-            </View>
+            <FullScreenLoader/>
         );
     }
 
@@ -92,9 +91,9 @@ export default function OrderDetails() {
                     <View style={styles.itemCard}>
                         <Text style={styles.itemName}>{item.product.name}</Text>
                         <Text style={styles.itemDetail}>Количество: {item.quantity}</Text>
-                        <Text style={styles.itemDetail}>Цена: {Number(item.price).toLocaleString()} тг</Text>
+                        <Text style={styles.itemDetail}>Цена: {item.product.discount_price ? Number(item.product.discount_price).toLocaleString() : Number(item.product.price).toLocaleString()} тг</Text>
                         <Text style={styles.itemTotal}>
-                            Итого: {(Number(item.price) * item.quantity).toLocaleString()} тг
+                            Итого: { item.product.discount_price ? (Number(item.product.discount_price) * item.quantity).toLocaleString() : (Number(item.product.price) * item.quantity).toLocaleString()} тг
                         </Text>
                     </View>
                 )}
@@ -125,7 +124,7 @@ const styles = StyleSheet.create({
     headerRow: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
     info: { fontSize: 16, marginBottom: 5, color: '#333' },
     infoLabel: { fontWeight: '600', color: '#555' },
-    sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 10, color: '#007AFF' },
+    sectionTitle: { fontSize: 20, fontWeight: '700', marginBottom: 10, color: '#000' },
     itemCard: {
         backgroundColor: '#fff',
         padding: 15,
@@ -139,7 +138,7 @@ const styles = StyleSheet.create({
     },
     itemName: { fontSize: 16, fontWeight: '600', marginBottom: 5, color: '#222' },
     itemDetail: { fontSize: 14, color: '#555' },
-    itemTotal: { fontSize: 15, fontWeight: '700', marginTop: 5, color: '#007AFF' },
+    itemTotal: { fontSize: 15, fontWeight: '700', marginTop: 5, color: '#000' },
     totalCard: {
         backgroundColor: '#fff',
         padding: 18,
@@ -152,6 +151,6 @@ const styles = StyleSheet.create({
         elevation: 3,
         alignItems: 'center',
     },
-    totalText: { fontSize: 18, fontWeight: '700', color: '#007AFF' },
+    totalText: { fontSize: 18, fontWeight: '700', color: '#000' },
     errorText: { fontSize: 18, color: 'red', marginTop: 30, textAlign: 'center' },
 });

@@ -7,10 +7,11 @@ type Props = {
     visible: boolean;
     onDismiss: () => void;
     onGoToCart?: () => void;
-    cartItemId?: number | null; // это ID CartItem, а не Product
+    cartItemId?: number | null;
+    wrapperStyle?: any;
 };
 
-export default function CartSnackbar({ visible, onDismiss, onGoToCart, cartItemId }: Props) {
+export default function CartSnackbar({ visible, onDismiss, onGoToCart, cartItemId, wrapperStyle }: Props) {
     const { accessToken } = useAppSelector(state => state.auth);
     const { API } = useAppSelector(state => state.products);
 
@@ -34,15 +35,15 @@ export default function CartSnackbar({ visible, onDismiss, onGoToCart, cartItemI
             console.log(error);
         }
     };
-
+console.log(cartItemId)
     return (
         <Snackbar
             visible={visible}
             onDismiss={onDismiss}
             duration={2000}
             action={{ label: "Отменить", onPress: handleCancelAdd }}
-            wrapperStyle={{ position: 'absolute', bottom: -30, left: 15, right: 0 }} // сдвиг вправо и отступы
-            style={{ borderRadius: 12, paddingHorizontal: 15 }} // внутренние отступы
+            wrapperStyle={[wrapperStyle, { position: 'absolute', bottom: -30,  }]} 
+            style={[{ borderRadius: 12, paddingHorizontal: 15 }]}
         >
             Товар добавлен в корзину 🛒
         </Snackbar>
