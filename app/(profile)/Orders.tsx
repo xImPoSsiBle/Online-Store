@@ -62,14 +62,14 @@ const Orders = () => {
           <Text style={styles.emptyEmoji}>📭</Text>
           <Text style={styles.emptyTitle}>У вас пока нет заказов</Text>
           <Text style={styles.emptySubtitle}>
-            Вы ещё ничего не заказывали. Перейдите в каталог 😊
+            Вы ещё ничего не заказывали. Перейдите на главную страницу 😊
           </Text>
 
           <TouchableOpacity
             style={styles.emptyButton}
-            onPress={() => router.push("/catalog")}
+            onPress={() => router.push("/home")}
           >
-            <Text style={styles.emptyButtonText}>Перейти в каталог</Text>
+            <Text style={styles.emptyButtonText}>Перейти на главную</Text>
           </TouchableOpacity>
         </Animatable.View>
       </View>
@@ -124,6 +124,6 @@ const styles = StyleSheet.create({
   emptyEmoji: { fontSize: 60, marginBottom: 20 },
   emptyTitle: { fontSize: 22, fontWeight: "700", marginBottom: 10 },
   emptySubtitle: { fontSize: 15, marginBottom: 25, textAlign: 'center' },
-  emptyButton: { backgroundColor: '#007AFF', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 25 },
+  emptyButton: { backgroundColor: '#000', paddingVertical: 12, paddingHorizontal: 25, borderRadius: 25 },
   emptyButtonText: { color: '#fff', fontSize: 16, fontWeight: "600" },
 });

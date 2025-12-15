@@ -1,18 +1,23 @@
 import { BackButton } from '@/components/BackButton';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { setUsername } from '@/store/AuthSlice';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 const EditProfile = () => {
-  const [name, setName] = useState('Rza Rzaev');
+  const {username} = useAppSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+
+  const [name, setName] = useState(username || '');
   const [phone, setPhone] = useState('+7 701 123 45 67');
   const [email, setEmail] = useState('rza@example.com');
 
   const router = useRouter();
 
   const saveProfile = () => {
-    alert('Профиль обновлен!');
-    router.back();
+    dispatch(setUsername(name));
+    router.push('/(tabs)/profile');
   };
 
   return (
