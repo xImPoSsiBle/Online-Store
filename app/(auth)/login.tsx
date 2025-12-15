@@ -93,7 +93,7 @@ export default function Login() {
             </Button>
 
             <Text style={styles.linkText}>
-                Нет аккаунта? <Link href="/register" style={{ color: "#007AFF" }}>Зарегистрироваться</Link>
+                Нет аккаунта? <Link href="./register" style={{ color: "#007AFF" }}>Зарегистрироваться</Link>
             </Text>
 
             <Snackbar
